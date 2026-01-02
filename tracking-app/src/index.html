@@ -1,13 +1,86 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>TrackingApp</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
-</body>
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Exercise Program Tracker</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              // Dark, minimalist scheme with electric blue accent
+              primary: 'var(--color-electric-blue)', // Striking electric blue for active elements
+              'background-light': '#2A2A2A', // Deep charcoal background for light mode (not used as we force dark mode)
+              'background-dark': 'var(--color-deep-charcoal)', // Deep charcoal background
+              'card-light': '#3C3C3C', // Slightly lighter charcoal for cards in light mode
+              'card-dark': '#3C3C3C', // Slightly lighter charcoal for cards in dark mode
+              'text-main': 'var(--color-off-white)', // Subtle off-white text
+              'text-muted': '#A0A0A0', // Lighter gray for muted text
+            },
+            fontFamily: {
+              display: ['Spline Sans', 'sans-serif'],
+            },
+            borderRadius: {
+              DEFAULT: '1rem',
+              lg: '1.5rem',
+              xl: '2rem',
+              full: '9999px',
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      :root {
+        --color-deep-charcoal: #1e1e1e;
+        --color-electric-blue: #007fff;
+        --color-off-white: #eaeaea;
+      }
+      .checkbox-wrapper input:checked + div {
+        background-color: var(--color-electric-blue);
+        border-color: var(--color-electric-blue);
+        color: black;
+      }
+      .checkbox-wrapper input:checked + div span {
+        opacity: 1;
+      }
+      input[type='number']::-webkit-inner-spin-button,
+      input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type='number'] {
+        -moz-appearance: textfield;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-background-dark font-display antialiased min-h-screen flex flex-col transition-colors duration-200"
+  >
+    <app-root></app-root>
+  </body>
 </html>

@@ -1,1 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+        :root {
+            --color-deep-charcoal: #1E1E1E;
+            --color-electric-blue: #007FFF;--color-off-white: #EAEAEA;
+        }

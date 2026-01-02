@@ -1,8 +1,8 @@
-import { TrainingState } from '../enums/training-state.enum';
+import { Status } from "../enums/status.enum";
 
 export interface TrainingModel {
   userId: string;
   trainingId: string;
-  state: TrainingState;
+  status: Status;
   startedAt: string;
 }

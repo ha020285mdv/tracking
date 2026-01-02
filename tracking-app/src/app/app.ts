@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TrainingService } from './core/services/training.service';
-import { TrainingState } from './core/enums/training-state.enum';
 
 @Component({
   selector: 'app-root',
@@ -15,8 +14,7 @@ export class App {
   protected readonly title = signal('tracking-app');
 
   constructor() {
-    console.log('App component initialized');
-    this.trainingService
+    /*  this.trainingService
       .createTraining$({
         userId: '000001',
         trainingId: '1',
@@ -26,6 +24,6 @@ export class App {
       .subscribe(
         (training) => console.log('Fetched training:', training),
         (error) => console.error('Error fetching training:', error)
-      );
+      ); */
   }
 }

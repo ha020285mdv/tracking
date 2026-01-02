@@ -17,4 +17,8 @@ export class TrainingService {
   getTrainingById$(id: string): Observable<TrainingModel> {
     return this.http.get<TrainingModel>(`${environment.firebaseApiBase}/training/${id}`);
   }
+
+  getActiveWorkout$(userId: string): Observable<TrainingModel> {
+    return this.http.get<TrainingModel>(`${environment.firebaseApiBase}/training/${userId}`);
+  }
 }

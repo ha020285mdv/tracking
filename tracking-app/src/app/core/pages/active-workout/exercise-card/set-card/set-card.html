@@ -1,0 +1,50 @@
+@let setValue = set(); @let isCompleted = setValue.status === status.Completed;
+
+<div
+  class="group relative flex items-center justify-between px-4 py-3 bg-card-dark rounded-xl shadow-sm border border-transparent opacity-70 transition-opacity"
+  (click)="activateSet()"
+>
+  <div class="flex items-center gap-4 flex-1">
+    @if (isCompleted) {
+    <div
+      class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary shrink-0"
+    >
+      <span class="material-symbols-outlined text-[20px]">check</span>
+    </div>
+    } @else {
+    <div
+      class="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-gray-400 shrink-0"
+    >
+      <span class="text-sm font-bold">{{ index() }}</span>
+    </div>
+    }
+    <div class="flex flex-col">
+      <p
+        class="text-sm font-bold text-text-main leading-tight opacity-70"
+        [class.line-through]="isCompleted"
+      >
+        {{ setValue.weight ? setValue.weight : 'BW' }} kg × {{ setValue.reps }}
+      </p>
+      @if (isCompleted) {
+      <div
+        class="flex items-center gap-2 mt-0.5 text-primary text-xs font-bold uppercase tracking-wider"
+      >
+        Set {{ index() }} Completed
+      </div>
+      } @else {
+      <div
+        class="flex items-center gap-2 mt-0.5 text-text-muted text-[10px] font-bold uppercase tracking-wider"
+      >
+        pending
+      </div>
+      }
+    </div>
+  </div>
+  @if (isCompleted) {
+  <div
+    class="w-8 h-8 rounded-full bg-primary text-black flex items-center justify-center shadow-sm"
+  >
+    <span class="material-symbols-outlined text-[18px] font-bold">check</span>
+  </div>
+  }
+</div>

@@ -1,0 +1,82 @@
+@let setValue = set();
+<div
+  class="relative w-[calc(100%-1rem)] mx-auto flex flex-col gap-4 p-5 rounded-xl shadow-lg border border-primary ring-1 ring-primary/20"
+>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span
+        class="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-black text-sm font-bold"
+        >2</span
+      >
+      <span class="text-base font-bold text-text-main">Active Set</span>
+    </div>
+    <span class="text-xs font-mono text-text-muted"
+      >Planned: {{ setValue.weight }}kg × {{ setValue.reps }}</span
+    >
+  </div>
+  <div class="grid grid-cols-2 gap-3">
+    <div class="flex flex-col gap-1.5">
+      <span
+        id="weight"
+        class="text-[10px] uppercase font-bold text-text-muted tracking-wider text-center"
+        >Weight (kg)</span
+      >
+      <div class="flex items-center bg-background-dark/30 rounded-lg p-1 border border-white/5">
+        <button
+          (click)="onDecrementWeight()"
+          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">remove</span>
+        </button>
+        <input
+          aria-labelledby="weight"
+          class="block w-full text-center bg-transparent border-0 p-0 text-text-main font-bold text-xl font-mono focus:ring-0"
+          type="number"
+          disabled
+          [value]="weightActual()"
+        />
+        <button
+          (click)="onIncrementWeight()"
+          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+        </button>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <span
+        id="reps"
+        class="text-[10px] uppercase font-bold text-text-muted tracking-wider text-center"
+        >Reps</span
+      >
+      <div class="flex items-center bg-background-dark/30 rounded-lg p-1 border border-white/5">
+        <button
+          (click)="onDecrementReps()"
+          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">remove</span>
+        </button>
+        <input
+          aria-labelledby="reps"
+          class="block w-full text-center bg-transparent border-0 p-0 text-text-main font-bold text-xl font-mono focus:ring-0"
+          type="number"
+          disabled
+          [value]="repsActual()"
+        />
+        <button
+          (click)="onIncrementReps()"
+          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <button
+    (click)="completeSet()"
+    class="w-full h-11 rounded-lg border-2 border-dashed border-gray-600 hover:border-primary hover:bg-primary/5 transition-all duration-200 flex items-center justify-center gap-2 text-gray-400 font-bold active:scale-[0.99] cursor-pointer"
+  >
+    <span class="material-symbols-outlined text-[20px]">check_circle</span>
+    <span>Mark Completed</span>
+  </button>
+</div>
