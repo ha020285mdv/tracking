@@ -3,7 +3,8 @@
   "scripts": {
     "build": "tsc",
     "lint": "echo 'skip lint'",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "seed": "ts-node src/scripts/seed-workouts.ts"
   },
   "main": "lib/index.js",
   "engines": {

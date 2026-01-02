@@ -1,4 +1,4 @@
 import * as functions from 'firebase-functions/v2';
-import { trainingsApi } from './app/training/training.routes';
+import { trainingsApi } from './app/workouts/workouts.routes';
 
 export const api = functions.https.onRequest({ region: 'europe-west1' }, trainingsApi);

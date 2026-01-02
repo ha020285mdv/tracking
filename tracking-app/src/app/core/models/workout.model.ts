@@ -1,7 +1,7 @@
 import { Exercise } from './exercise.model';
 
 export interface Workout {
-  id: number;
+  id: string;
   name: string;
   exercises: Exercise[];
 }

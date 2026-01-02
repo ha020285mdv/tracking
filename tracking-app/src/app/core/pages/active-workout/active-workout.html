@@ -1,3 +1,4 @@
+@let workoutValue = workout(); @if (workoutValue) {
 <!-- header. todo: move to layout -->
 <div
   class="pt-6 pb-2 px-4 sticky top-0 z-20 bg-background-dark/95 backdrop-blur-sm border-b border-white/5"
@@ -17,8 +18,9 @@
 
   <!-- components header -->
   <div class="flex flex-col gap-1 px-2">
-    <h1 class="text-3xl font-bold text-text-main tracking-tight">Leg Day - Week 4</h1>
+    <h1 class="text-3xl font-bold text-text-main tracking-tight">{{ workoutValue.name }}</h1>
     <p class="text-text-muted font-medium text-sm flex items-center gap-1">
+      <!-- TODO: calculate and show real data -->
       <span class="material-symbols-outlined text-[16px]">schedule</span> 45 mins
       <span class="mx-1">•</span>
       <span class="material-symbols-outlined text-[16px]">equalizer</span> Intermediate
@@ -30,8 +32,8 @@
 
 <!-- exercises -->
 <div class="flex-1 px-4 flex flex-col gap-8 pb-32 overflow-y-auto">
-  @for (exercise of workout().exercises; track exercise.name) {
-    <app-exercise-card [exercise]="exercise"></app-exercise-card>
+  @for (exercise of workoutValue.exercises; track exercise.name) {
+  <app-exercise-card [exercise]="exercise" [workoutId]="workoutValue.id"></app-exercise-card>
   }
 </div>
 
@@ -46,3 +48,4 @@
     Finish Workout
   </button>
 </div>
+}

@@ -1,13 +1,24 @@
-
-export interface TrainingModelDto {
-  userId: string;
-  trainingId: string;
-  state: TrainingStateDto;
-  startedAt: string;
+export interface WorkoutDto {
+  id: string;
+  name: string;
+  exercises: ExerciseDto[];
 }
 
-export enum TrainingStateDto {
-  NOT_STARTED = 'not_started',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
+export interface ExerciseDto {
+  id: string;
+  name: string;
+  sets: ExerciseSetDto[];
+}
+
+export interface ExerciseSetDto {
+  id: string;
+  weight: number | null;
+  reps: number;
+  status: StatusEnum;
+}
+
+export enum StatusEnum {
+  Completed = 'completed',
+  Pending = 'pending',
+  Active = 'active',
 }

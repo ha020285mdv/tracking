@@ -35,5 +35,5 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.api = void 0;
 const functions = __importStar(require("firebase-functions/v2"));
-const training_routes_1 = require("./app/training/training.routes");
-exports.api = functions.https.onRequest({ region: 'europe-west1' }, training_routes_1.trainingsApi);
+const workouts_routes_1 = require("./app/workouts/workouts.routes");
+exports.api = functions.https.onRequest({ region: 'europe-west1' }, workouts_routes_1.trainingsApi);
