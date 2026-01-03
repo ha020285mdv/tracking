@@ -60,11 +60,17 @@ async function activateSet(sessionId, exerciseId, setId) {
                     : set.status,
         })),
     }));
+    const lastModifiedAt = new Date().toISOString();
     await docRef.update({
         currentState: updatedExercises,
-        lastModifiedAt: new Date().toISOString(),
+        lastModifiedAt,
     });
-    return { ...session, currentState: updatedExercises };
+    return {
+        ...session,
+        id: sessionId,
+        currentState: updatedExercises,
+        lastModifiedAt,
+    };
 }
 async function completeSet(sessionId, exerciseId, completedSet) {
     const docRef = firebase_admin_1.db.collection('activeSessions').doc(sessionId);
@@ -80,11 +86,17 @@ async function completeSet(sessionId, exerciseId, completedSet) {
             ? { ...set, ...completedSet, status: models_1.StatusEnum.Completed }
             : set),
     }));
+    const lastModifiedAt = new Date().toISOString();
     await docRef.update({
         currentState: updatedExercises,
-        lastModifiedAt: new Date().toISOString(),
+        lastModifiedAt,
     });
-    return { ...session, currentState: updatedExercises };
+    return {
+        ...session,
+        id: sessionId,
+        currentState: updatedExercises,
+        lastModifiedAt,
+    };
 }
 // ============= ACTIVE SESSIONS =============
 async function startWorkoutSession(userId, templateId) {
@@ -188,7 +200,7 @@ async function finishWorkoutSession(sessionId, notes) {
         startedAt: session.startedAt,
         completedAt: completedAt.toISOString(),
         duration,
-        notes,
+        ...(notes !== undefined && { notes }),
     };
     // Use transaction to ensure both operations succeed
     const historyRef = firebase_admin_1.db.collection('workoutHistory').doc();

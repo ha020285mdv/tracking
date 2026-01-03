@@ -61,12 +61,18 @@ export async function activateSet(
     })),
   }));
 
+  const lastModifiedAt = new Date().toISOString();
   await docRef.update({
     currentState: updatedExercises,
-    lastModifiedAt: new Date().toISOString(),
+    lastModifiedAt,
   });
 
-  return { ...session, currentState: updatedExercises };
+  return {
+    ...session,
+    id: sessionId,
+    currentState: updatedExercises,
+    lastModifiedAt,
+  };
 }
 
 export async function completeSet(
@@ -93,12 +99,18 @@ export async function completeSet(
     ),
   }));
 
+  const lastModifiedAt = new Date().toISOString();
   await docRef.update({
     currentState: updatedExercises,
-    lastModifiedAt: new Date().toISOString(),
+    lastModifiedAt,
   });
 
-  return { ...session, currentState: updatedExercises };
+  return {
+    ...session,
+    id: sessionId,
+    currentState: updatedExercises,
+    lastModifiedAt,
+  };
 }
 
 // ============= ACTIVE SESSIONS =============
@@ -238,7 +250,7 @@ export async function finishWorkoutSession(
     startedAt: session.startedAt,
     completedAt: completedAt.toISOString(),
     duration,
-    notes,
+    ...(notes !== undefined && { notes }),
   };
 
   // Use transaction to ensure both operations succeed

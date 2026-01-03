@@ -13,13 +13,11 @@ import { WorkoutHistory } from '../models/workout-history.model';
 export class WorkoutService {
   private http = inject(HttpClient);
 
-  ///    WORKOUT TEMPLATES ///
-  // TODO: maybe delete?
-  private readonly _currentWorkout$ = new BehaviorSubject<Workout | null>(null);
+  private readonly _activeSession$ = new BehaviorSubject<ActiveSession | null>(null);
+  public readonly activeSession$ = this._activeSession$.asObservable();
 
-  // used
-  get currentWorkout$(): Observable<Workout | null> {
-    return this._currentWorkout$.asObservable();
+  setActiveSession(session: ActiveSession | null): void {
+    this._activeSession$.next(session);
   }
 
   createWorkout$(workout: Workout): Observable<Workout> {
@@ -30,13 +28,6 @@ export class WorkoutService {
     return this.http.get<Workout>(`${environment.firebaseApiBase}/workouts/${id}`);
   }
 
-  /*    
-  getWorkoutsByUserId$(userId: string): Observable<Workout> {
-    const params = new HttpParams().set('userId', userId);
-    return this.http.get<Workout>(`${environment.firebaseApiBase}/workouts`, { params });
-  }
-   */
-
   getWorkoutsByUserId$(userId: string, limit?: number): Observable<Workout[]> {
     let params = new HttpParams().set('userId', userId);
     if (limit) {
@@ -45,19 +36,6 @@ export class WorkoutService {
     return this.http.get<Workout[]>(`${environment.firebaseApiBase}/workouts`, { params });
   }
 
-  refreshCurrentWorkout(workoutId: string): Observable<Workout> {
-    return this.getWorkoutById$(workoutId).pipe(
-      tap((workout) => this._currentWorkout$.next(workout))
-    );
-  }
-
-  //used
-  setCurrentWorkout(workout: Workout | null): void {
-    this._currentWorkout$.next(workout);
-  }
-
-  ///    SESSIONS TEMPLATES ///
-  // Start workout
   startWorkout$(userId: string, templateId: string): Observable<ActiveSession> {
     return this.http.post<ActiveSession>(`${environment.firebaseApiBase}/sessions/start`, {
       userId,
@@ -65,31 +43,6 @@ export class WorkoutService {
     });
   }
 
-  // Get active session
-  getActiveSession$(userId: string): Observable<ActiveSession | null> {
-    const params = new HttpParams().set('userId', userId);
-    return this.http.get<ActiveSession | null>(`${environment.firebaseApiBase}/sessions/active`, {
-      params,
-    });
-  }
-
-  //used
-  activateSet(sessionId: string, exerciseId: string, setId: string): Observable<ActiveSession> {
-    return this.http.post<ActiveSession>(
-      `${environment.firebaseApiBase}/sessions/${sessionId}/activate-set`,
-      { exerciseId, setId }
-    );
-  }
-
-  //used
-  completeSet(sessionId: string, exerciseId: string, set: ExerciseSet): Observable<ActiveSession> {
-    return this.http.post<ActiveSession>(
-      `${environment.firebaseApiBase}/sessions/${sessionId}/complete-set`,
-      { exerciseId, set }
-    );
-  }
-
-  // Finish workout
   finishWorkout$(sessionId: string, notes?: string): Observable<WorkoutHistory> {
     return this.http.post<WorkoutHistory>(
       `${environment.firebaseApiBase}/sessions/${sessionId}/finish`,
@@ -97,8 +50,31 @@ export class WorkoutService {
     );
   }
 
-  ///    SESSIONS TEMPLATES ///
-  // Get workout history
+  getActiveSession$(userId: string): Observable<ActiveSession | null> {
+    const params = new HttpParams().set('userId', userId);
+    return this.http.get<ActiveSession | null>(`${environment.firebaseApiBase}/sessions/active`, {
+      params,
+    });
+  }
+
+  activateSet(sessionId: string, exerciseId: string, setId: string): Observable<ActiveSession> {
+    return this.http
+      .post<ActiveSession>(`${environment.firebaseApiBase}/sessions/${sessionId}/activate-set`, {
+        exerciseId,
+        setId,
+      })
+      .pipe(tap((session) => this._activeSession$.next(session)));
+  }
+
+  completeSet(sessionId: string, exerciseId: string, set: ExerciseSet): Observable<ActiveSession> {
+    return this.http
+      .post<ActiveSession>(`${environment.firebaseApiBase}/sessions/${sessionId}/complete-set`, {
+        exerciseId,
+        set,
+      })
+      .pipe(tap((session) => this._activeSession$.next(session)));
+  }
+
   getWorkoutHistory$(userId: string, limit?: number): Observable<WorkoutHistory[]> {
     let params = new HttpParams().set('userId', userId);
     if (limit) {

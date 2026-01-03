@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
-import { ExerciseSet } from '../../../../models/exercise-set.model';
-import { Status } from '../../../../enums/status.enum';
+import { ExerciseSet } from '../../../models/exercise-set.model';
+import { Status } from '../../../enums/status.enum';
 
 @Component({
   selector: 'app-set-card',

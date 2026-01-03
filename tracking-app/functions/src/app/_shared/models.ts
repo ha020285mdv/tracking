@@ -15,7 +15,7 @@ export interface ExerciseDto {
 
 export interface ExerciseSetDto {
   id: string;
-  weight: number | null;
+  weight: number;
   reps: number;
   status: StatusEnum;
 }

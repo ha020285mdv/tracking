@@ -1,11 +1,11 @@
-@let setValue = set(); @let isCompleted = setValue.status === status.Completed;
+@let setValue = set();
 
 <div
   class="group relative flex items-center justify-between px-4 py-3 bg-card-dark rounded-xl shadow-sm border border-transparent opacity-70 transition-opacity"
   (click)="activateSet()"
 >
   <div class="flex items-center gap-4 flex-1">
-    @if (isCompleted) {
+    @if (setValue.status === status.Completed) {
     <div
       class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary shrink-0"
     >
@@ -18,29 +18,36 @@
       <span class="text-sm font-bold">{{ index() }}</span>
     </div>
     }
+    <!-- TODO: move to pipe -->
     <div class="flex flex-col">
       <p
         class="text-sm font-bold text-text-main leading-tight opacity-70"
-        [class.line-through]="isCompleted"
+        [class.line-through]="setValue.status === status.Completed"
       >
         {{ setValue.weight ? setValue.weight : 'BW' }} kg × {{ setValue.reps }}
       </p>
-      @if (isCompleted) {
+      @if (setValue.status === status.Completed) {
       <div
         class="flex items-center gap-2 mt-0.5 text-primary text-xs font-bold uppercase tracking-wider"
       >
         Set {{ index() }} Completed
       </div>
+      } @else if (setValue.status === status.Pending) {
+      <div
+        class="flex items-center gap-2 mt-0.5 text-text-muted text-[10px] font-bold uppercase tracking-wider"
+      >
+        Pending
+      </div>
       } @else {
       <div
         class="flex items-center gap-2 mt-0.5 text-text-muted text-[10px] font-bold uppercase tracking-wider"
       >
-        pending
+        Not started
       </div>
       }
     </div>
   </div>
-  @if (isCompleted) {
+  @if (setValue.status === status.Completed) {
   <div
     class="w-8 h-8 rounded-full bg-primary text-black flex items-center justify-center shadow-sm"
   >

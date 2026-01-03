@@ -1,7 +1,7 @@
 import { Component, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ExerciseSet } from '../../../../models/exercise-set.model';
-import { Status } from '../../../../enums/status.enum';
+import { ExerciseSet } from '../../../models/exercise-set.model';
+import { Status } from '../../../enums/status.enum';
 
 @Component({
   selector: 'app-set-card-active',
@@ -23,10 +23,9 @@ export class SetCardActive {
 
   constructor() {
     effect(() => {
-      this.weightActual.set(this.set().weight);
-    });
-    effect(() => {
-      this.repsActual.set(this.set().reps);
+      const currentSet = this.set();
+      this.weightActual.set(currentSet.weight);
+      this.repsActual.set(currentSet.reps);
     });
   }
 

@@ -1,7 +1,7 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { WorkoutService } from '../../services/workout.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { catchError, of } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { Calendar } from './calendar/calendar';
 import { UserWidget } from './user-widget/user-widget';
 import { WorkoutItem } from '../../components/workout-item/workout-item';
@@ -30,5 +30,12 @@ export class HomePage {
       takeUntilDestroyed(this.destroyRef)
     ),
     { initialValue: [] }
+  );
+
+  protected readonly isThereActiveSession = toSignal(
+    this.workoutService.activeSession$.pipe(map((session) => !!session)),
+    {
+      initialValue: false,
+    }
   );
 }

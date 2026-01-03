@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-4">
-  <h2 class="px-2 text-xl font-bold text-text-main leading-tight">Choose Your Workout</h2>
+  <h2 class="px-2 text-xl font-bold text-text-main leading-tight">Select Workout</h2>
   <div class="flex flex-col gap-3">
     @for (workout of workouts(); track workout.id) {
       <app-workout-item [workout]="workout"></app-workout-item>

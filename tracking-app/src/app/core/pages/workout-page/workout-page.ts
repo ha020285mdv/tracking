@@ -1,44 +1,43 @@
 import { Component, computed, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ProgressBar } from './progress-bar/progress-bar';
-import { Status } from '../../enums/status.enum';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Workout } from '../../models/workout.model';
-import { ExerciseCard } from './exercise-card/exercise-card';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ExerciseCard } from '../../components/exercise-card/exercise-card';
+import { WorkoutService } from '../../services/workout.service';
 
 @Component({
   selector: 'app-workout-page',
-  imports: [ProgressBar, ExerciseCard],
+  imports: [ExerciseCard],
   templateUrl: './workout-page.html',
   styleUrl: './workout-page.scss',
 })
 export class WorkoutPage {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly workoutService = inject(WorkoutService);
+
+  private readonly userId = '007'; // TODO: get from auth service
 
   protected readonly workout = toSignal<Workout | null>(
     this.route.data.pipe(map((data) => data['workout'] as Workout | null)),
     { initialValue: null }
   );
 
-  public readonly progress = computed(() => {
-    const w = this.workout();
-    if (!w) {
-      return 0;
+  protected readonly isThereActiveSession = toSignal(
+    this.workoutService.activeSession$.pipe(map((session) => !!session)),
+    {
+      initialValue: false,
     }
-    const totalSets = w.exercises.reduce((total, exercise) => total + exercise.sets.length, 0);
+  );
 
-    const completedSets = w.exercises.reduce(
-      (total, exercise) =>
-        total + exercise.sets.filter((set) => set.status === Status.Completed).length,
-      0
-    );
-
-    return totalSets === 0 ? 0 : Math.round((completedSets / totalSets) * 100);
-  });
-
-  //TODO: add implementation
-  public finish() {
-    throw new Error('Method not implemented.');
+  onStartWorkout() {
+    const templateId = this.workout()?.id;
+    if (!templateId) {
+      return;
+    }
+    this.workoutService.startWorkout$(this.userId, templateId).subscribe(() => {
+      this.router.navigate(['/session']);
+    });
   }
 }
