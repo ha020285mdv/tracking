@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../_shared/auth';
 import {
   createWorkout,
   getWorkoutByUserId,
@@ -14,9 +15,9 @@ import {
   getWorkoutHistoryById,
 } from './workouts.repository';
 
-export const createWorkoutHandler = async (req: Request, res: Response) => {
+export const createWorkoutHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const workout = req.body;
+    const workout = { ...req.body, userId: req.userId };
     const result = await createWorkout(workout);
     res.status(201).json(result);
   } catch (err: any) {
@@ -24,9 +25,9 @@ export const createWorkoutHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const getWorkoutByUserIdHandler = async (req: Request, res: Response) => {
+export const getWorkoutByUserIdHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.userId!;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
     const result = await getWorkoutByUserId(userId, limit);
     res.status(200).json(result);
@@ -35,7 +36,7 @@ export const getWorkoutByUserIdHandler = async (req: Request, res: Response) => 
   }
 };
 
-export const getWorkoutByIdHandler = async (req: Request, res: Response) => {
+export const getWorkoutByIdHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id;
     const result = await getWorkoutById(id);
@@ -45,7 +46,7 @@ export const getWorkoutByIdHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const activateSetHandler = async (req: Request, res: Response) => {
+export const activateSetHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { sessionId } = req.params;
     const { exerciseId, setId } = req.body;
@@ -56,7 +57,7 @@ export const activateSetHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const completeSetHandler = async (req: Request, res: Response) => {
+export const completeSetHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { sessionId } = req.params;
     const { exerciseId, set } = req.body;
@@ -69,12 +70,13 @@ export const completeSetHandler = async (req: Request, res: Response) => {
 
 // ============= ACTIVE SESSIONS =============
 
-export const startWorkoutHandler = async (req: Request, res: Response) => {
+export const startWorkoutHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { userId, templateId } = req.body;
+    const userId = req.userId!;
+    const { templateId } = req.body;
 
-    if (!userId || !templateId) {
-      return res.status(400).json({ error: 'userId and templateId are required' });
+    if (!templateId) {
+      return res.status(400).json({ error: 'templateId is required' });
     }
 
     const result = await startWorkoutSession(userId, templateId);
@@ -87,14 +89,9 @@ export const startWorkoutHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const getActiveSessionHandler = async (req: Request, res: Response) => {
+export const getActiveSessionHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.query.userId as string;
-
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
-
+    const userId = req.userId!;
     const result = await getActiveSessionByUserId(userId);
     res.status(200).json(result);
   } catch (err: any) {
@@ -102,7 +99,7 @@ export const getActiveSessionHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const getActiveSessionByIdHandler = async (req: Request, res: Response) => {
+export const getActiveSessionByIdHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { sessionId } = req.params;
     const result = await getActiveSessionById(sessionId);
@@ -117,7 +114,7 @@ export const getActiveSessionByIdHandler = async (req: Request, res: Response) =
   }
 };
 
-export const updateActiveSessionHandler = async (req: Request, res: Response) => {
+export const updateActiveSessionHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { sessionId } = req.params;
     const { currentState } = req.body;
@@ -136,7 +133,7 @@ export const updateActiveSessionHandler = async (req: Request, res: Response) =>
 
 // ============= WORKOUT HISTORY =============
 
-export const finishWorkoutHandler = async (req: Request, res: Response) => {
+export const finishWorkoutHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { sessionId } = req.params;
     const { notes } = req.body;
@@ -151,15 +148,10 @@ export const finishWorkoutHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const getWorkoutHistoryHandler = async (req: Request, res: Response) => {
+export const getWorkoutHistoryHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.userId!;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
-
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
-
     const result = await getWorkoutHistoryByUserId(userId, limit);
     res.status(200).json(result);
   } catch (err: any) {
@@ -167,7 +159,7 @@ export const getWorkoutHistoryHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const getWorkoutHistoryByIdHandler = async (req: Request, res: Response) => {
+export const getWorkoutHistoryByIdHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { historyId } = req.params;
     const result = await getWorkoutHistoryById(historyId);

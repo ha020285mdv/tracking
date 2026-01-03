@@ -24,7 +24,8 @@ async function createWorkout(training) {
     return { ...training, id: ref.id, createdAt: now, updatedAt: now };
 }
 async function getWorkoutByUserId(userId, limit) {
-    let query = firebase_admin_1.db.collection('workouts').where('userId', '==', userId);
+    // development: fetch all workouts (comment out the where clause)
+    let query = firebase_admin_1.db.collection('workouts'); // .where('userId', '==', userId);
     if (limit) {
         query = query.limit(limit);
     }

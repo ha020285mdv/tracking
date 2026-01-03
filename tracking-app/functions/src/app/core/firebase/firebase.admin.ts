@@ -6,3 +6,6 @@ export const firebaseAdminApp = admin.apps.length ? admin.app() : admin.initiali
 // Firestore & Auth exports
 export const db = firebaseAdminApp.firestore();
 export const auth = firebaseAdminApp.auth();
+
+// Export admin for authentication middleware
+export { admin };

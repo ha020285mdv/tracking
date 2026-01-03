@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Workout } from '../../models/workout.model';
-import { map } from 'rxjs';
+import { map, take } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ExerciseCard } from '../../components/exercise-card/exercise-card';
 import { WorkoutService } from '../../services/workout.service';
@@ -16,8 +16,6 @@ export class WorkoutPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly workoutService = inject(WorkoutService);
-
-  private readonly userId = '007'; // TODO: get from auth service
 
   protected readonly workout = toSignal<Workout | null>(
     this.route.data.pipe(map((data) => data['workout'] as Workout | null)),
@@ -36,8 +34,21 @@ export class WorkoutPage {
     if (!templateId) {
       return;
     }
-    this.workoutService.startWorkout$(this.userId, templateId).subscribe(() => {
-      this.router.navigate(['/session']);
-    });
+    this.workoutService
+      .startWorkout$(templateId)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/session']);
+        },
+        error: (error) => {
+          // if there's already an active session (409), navigate to it
+          if (error.status === 409) {
+            this.router.navigate(['/session']);
+          } else {
+            console.error('Error starting workout:', error);
+          }
+        },
+      });
   }
 }

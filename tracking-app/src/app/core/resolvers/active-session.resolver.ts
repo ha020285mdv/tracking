@@ -7,9 +7,8 @@ import { catchError, of, tap } from 'rxjs';
 export const activeSessionResolver: ResolveFn<ActiveSession | null> = () => {
   const workoutService = inject(WorkoutService);
   const router = inject(Router);
-  const userId = '007'; // TODO: Get from auth service
 
-  return workoutService.getActiveSession$(userId).pipe(
+  return workoutService.getActiveSession$().pipe(
     tap((session) => {
       // redirect to home if no active session found
       if (!session) {
@@ -19,8 +18,8 @@ export const activeSessionResolver: ResolveFn<ActiveSession | null> = () => {
         workoutService.setActiveSession(session);
       }
     }),
-    catchError(() => {
-      // redirect to home on error
+    catchError((error) => {
+      // redirect home on error
       router.navigate(['/']);
       return of(null);
     })

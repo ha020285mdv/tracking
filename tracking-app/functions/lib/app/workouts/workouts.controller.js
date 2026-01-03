@@ -4,7 +4,7 @@ exports.getWorkoutHistoryByIdHandler = exports.getWorkoutHistoryHandler = export
 const workouts_repository_1 = require("./workouts.repository");
 const createWorkoutHandler = async (req, res) => {
     try {
-        const workout = req.body;
+        const workout = { ...req.body, userId: req.userId };
         const result = await (0, workouts_repository_1.createWorkout)(workout);
         res.status(201).json(result);
     }
@@ -15,7 +15,7 @@ const createWorkoutHandler = async (req, res) => {
 exports.createWorkoutHandler = createWorkoutHandler;
 const getWorkoutByUserIdHandler = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.userId;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
         const result = await (0, workouts_repository_1.getWorkoutByUserId)(userId, limit);
         res.status(200).json(result);
@@ -63,9 +63,10 @@ exports.completeSetHandler = completeSetHandler;
 // ============= ACTIVE SESSIONS =============
 const startWorkoutHandler = async (req, res) => {
     try {
-        const { userId, templateId } = req.body;
-        if (!userId || !templateId) {
-            return res.status(400).json({ error: 'userId and templateId are required' });
+        const userId = req.userId;
+        const { templateId } = req.body;
+        if (!templateId) {
+            return res.status(400).json({ error: 'templateId is required' });
         }
         const result = await (0, workouts_repository_1.startWorkoutSession)(userId, templateId);
         res.status(201).json(result);
@@ -80,10 +81,7 @@ const startWorkoutHandler = async (req, res) => {
 exports.startWorkoutHandler = startWorkoutHandler;
 const getActiveSessionHandler = async (req, res) => {
     try {
-        const userId = req.query.userId;
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.userId;
         const result = await (0, workouts_repository_1.getActiveSessionByUserId)(userId);
         res.status(200).json(result);
     }
@@ -139,11 +137,8 @@ const finishWorkoutHandler = async (req, res) => {
 exports.finishWorkoutHandler = finishWorkoutHandler;
 const getWorkoutHistoryHandler = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.userId;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
         const result = await (0, workouts_repository_1.getWorkoutHistoryByUserId)(userId, limit);
         res.status(200).json(result);
     }

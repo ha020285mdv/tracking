@@ -12,7 +12,8 @@ export async function createWorkout(training: WorkoutDto): Promise<WorkoutDto> {
 }
 
 export async function getWorkoutByUserId(userId: string, limit?: number): Promise<WorkoutDto[]> {
-  let query = db.collection('workouts').where('userId', '==', userId);
+  // development: fetch all workouts (comment out the where clause)
+  let query: FirebaseFirestore.Query = db.collection('workouts'); // .where('userId', '==', userId);
 
   if (limit) {
     query = query.limit(limit);

@@ -18,10 +18,9 @@ export class HomePage {
   private readonly workoutService = inject(WorkoutService);
 
   private readonly workoutsLimit = 2;
-  private readonly userId = '007'; // TODO: get from auth service
 
   protected readonly workouts = toSignal(
-    this.workoutService.getWorkoutsByUserId$(this.userId, this.workoutsLimit).pipe(
+    this.workoutService.getWorkoutsByUserId$(this.workoutsLimit).pipe(
       // TODO: handle errors
       catchError((error) => {
         console.error('Error fetching workouts', error);

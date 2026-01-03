@@ -12,12 +12,11 @@ import { catchError, of } from 'rxjs';
   styleUrl: './workouts-page.scss',
 })
 export class WorkoutsPage {
-  private readonly userId = '007'; // TODO: get from auth service
   private readonly destroyRef = inject(DestroyRef);
   private readonly workoutService = inject(WorkoutService);
 
   protected readonly workouts = toSignal(
-    this.workoutService.getWorkoutsByUserId$(this.userId).pipe(
+    this.workoutService.getWorkoutsByUserId$().pipe(
       // TODO: handle errors
       catchError((error) => {
         console.error('Error fetching workouts', error);

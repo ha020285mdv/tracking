@@ -20,6 +20,10 @@ export class WorkoutService {
     this._activeSession$.next(session);
   }
 
+  clearActiveSession(): void {
+    this._activeSession$.next(null);
+  }
+
   createWorkout$(workout: Workout): Observable<Workout> {
     return this.http.post<Workout>(`${environment.firebaseApiBase}/workouts`, workout);
   }
@@ -28,33 +32,34 @@ export class WorkoutService {
     return this.http.get<Workout>(`${environment.firebaseApiBase}/workouts/${id}`);
   }
 
-  getWorkoutsByUserId$(userId: string, limit?: number): Observable<Workout[]> {
-    let params = new HttpParams().set('userId', userId);
+  getWorkoutsByUserId$(limit?: number): Observable<Workout[]> {
+    let params = new HttpParams();
     if (limit) {
       params = params.set('limit', limit.toString());
     }
     return this.http.get<Workout[]>(`${environment.firebaseApiBase}/workouts`, { params });
   }
 
-  startWorkout$(userId: string, templateId: string): Observable<ActiveSession> {
-    return this.http.post<ActiveSession>(`${environment.firebaseApiBase}/sessions/start`, {
-      userId,
-      templateId,
-    });
+  startWorkout$(templateId: string): Observable<ActiveSession> {
+    return this.http
+      .post<ActiveSession>(`${environment.firebaseApiBase}/sessions/start`, {
+        templateId,
+      })
+      .pipe(tap((session) => this._activeSession$.next(session)));
   }
 
   finishWorkout$(sessionId: string, notes?: string): Observable<WorkoutHistory> {
-    return this.http.post<WorkoutHistory>(
-      `${environment.firebaseApiBase}/sessions/${sessionId}/finish`,
-      { notes }
-    );
+    return this.http
+      .post<WorkoutHistory>(`${environment.firebaseApiBase}/sessions/${sessionId}/finish`, {
+        notes,
+      })
+      .pipe(tap(() => this._activeSession$.next(null)));
   }
 
-  getActiveSession$(userId: string): Observable<ActiveSession | null> {
-    const params = new HttpParams().set('userId', userId);
-    return this.http.get<ActiveSession | null>(`${environment.firebaseApiBase}/sessions/active`, {
-      params,
-    });
+  getActiveSession$(): Observable<ActiveSession | null> {
+    return this.http
+      .get<ActiveSession | null>(`${environment.firebaseApiBase}/sessions/active`)
+      .pipe(tap((session) => this._activeSession$.next(session)));
   }
 
   activateSet(sessionId: string, exerciseId: string, setId: string): Observable<ActiveSession> {
@@ -75,8 +80,8 @@ export class WorkoutService {
       .pipe(tap((session) => this._activeSession$.next(session)));
   }
 
-  getWorkoutHistory$(userId: string, limit?: number): Observable<WorkoutHistory[]> {
-    let params = new HttpParams().set('userId', userId);
+  getWorkoutHistory$(limit?: number): Observable<WorkoutHistory[]> {
+    let params = new HttpParams();
     if (limit) {
       params = params.set('limit', limit.toString());
     }

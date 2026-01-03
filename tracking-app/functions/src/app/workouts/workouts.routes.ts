@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { authenticateUser } from '../_shared/auth';
 import {
   createWorkoutHandler,
   getWorkoutByUserIdHandler,
@@ -21,6 +22,9 @@ trainingsApi.use(cors({ origin: true }));
 trainingsApi.use(express.json());
 
 trainingsApi.get('/ping', (_req, res) => res.json({ ok: true }));
+
+// Apply authentication middleware to all routes below
+trainingsApi.use(authenticateUser);
 
 // Workout Templates
 trainingsApi.post('/workouts', createWorkoutHandler);
