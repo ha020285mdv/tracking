@@ -5,7 +5,14 @@ import {
   getWorkoutByUserIdHandler,
   getWorkoutByIdHandler,
   activateSetHandler,
-  completeSetHandler
+  completeSetHandler,
+  startWorkoutHandler,
+  getActiveSessionHandler,
+  getActiveSessionByIdHandler,
+  updateActiveSessionHandler,
+  finishWorkoutHandler,
+  getWorkoutHistoryHandler,
+  getWorkoutHistoryByIdHandler,
 } from './workouts.controller';
 
 export const trainingsApi = express();
@@ -14,8 +21,21 @@ trainingsApi.use(cors({ origin: true }));
 trainingsApi.use(express.json());
 
 trainingsApi.get('/ping', (_req, res) => res.json({ ok: true }));
+
+// Workout Templates
 trainingsApi.post('/workouts', createWorkoutHandler);
 trainingsApi.get('/workouts', getWorkoutByUserIdHandler);
 trainingsApi.get('/workouts/:id', getWorkoutByIdHandler);
-trainingsApi.post('/workouts/:workoutId/activate-set', activateSetHandler);
-trainingsApi.post('/workouts/:workoutId/complete-set', completeSetHandler);
+
+// Active Sessions
+trainingsApi.post('/sessions/start', startWorkoutHandler);
+trainingsApi.get('/sessions/active', getActiveSessionHandler);
+trainingsApi.get('/sessions/:sessionId', getActiveSessionByIdHandler);
+trainingsApi.patch('/sessions/:sessionId', updateActiveSessionHandler);
+trainingsApi.post('/sessions/:sessionId/activate-set', activateSetHandler);
+trainingsApi.post('/sessions/:sessionId/complete-set', completeSetHandler);
+trainingsApi.post('/sessions/:sessionId/finish', finishWorkoutHandler);
+
+// Workout History
+trainingsApi.get('/history', getWorkoutHistoryHandler);
+trainingsApi.get('/history/:historyId', getWorkoutHistoryByIdHandler);

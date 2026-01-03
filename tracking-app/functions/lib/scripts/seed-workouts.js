@@ -74,7 +74,7 @@ else {
     process.exit(1);
 }
 const db = app.firestore();
-// Mock workout data for seeding
+// Mock workout data for seeding - all templates use NotStarted status
 const SEED_WORKOUTS = [
     {
         name: 'Push Day A',
@@ -83,46 +83,73 @@ const SEED_WORKOUTS = [
                 id: '1',
                 name: 'Bench Press',
                 sets: [
-                    { id: '1', weight: 60, reps: 8, status: models_1.StatusEnum.Completed },
-                    { id: '2', weight: 65, reps: 6, status: models_1.StatusEnum.Completed },
-                    { id: '3', weight: 70, reps: 5, status: models_1.StatusEnum.Completed },
-                    { id: '4', weight: 70, reps: 5, status: models_1.StatusEnum.Completed },
+                    { id: '1', weight: 60, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 65, reps: 6, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 70, reps: 5, status: models_1.StatusEnum.NotStarted },
+                    { id: '4', weight: 70, reps: 5, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '2',
                 name: 'Overhead Press',
                 sets: [
-                    { id: '1', weight: 40, reps: 10, status: models_1.StatusEnum.Completed },
-                    { id: '2', weight: 42, reps: 8, status: models_1.StatusEnum.Active },
-                    { id: '3', weight: 42, reps: 8, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 40, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 42, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 42, reps: 8, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '3',
                 name: 'Incline Dumbbell Press',
                 sets: [
-                    { id: '1', weight: 22, reps: 12, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 22, reps: 10, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 22, reps: 10, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 22, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 24, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 24, reps: 10, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '4',
                 name: 'Tricep Pushdowns',
                 sets: [
-                    { id: '1', weight: 25, reps: 15, status: models_1.StatusEnum.Active },
-                    { id: '2', weight: 27, reps: 12, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 30, reps: 10, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 25, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 27, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 30, reps: 10, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '5',
-                name: 'Push-ups',
+                name: 'Lateral Raises',
                 sets: [
-                    { id: '1', weight: 0, reps: 20, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 0, reps: 15, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 0, reps: 12, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 10, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 12, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 12, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Dumbbell Flyes',
+                sets: [
+                    { id: '1', weight: 18, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 20, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 20, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '7',
+                name: 'Front Raises',
+                sets: [
+                    { id: '1', weight: 10, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 12, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 12, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '8',
+                name: 'Skull Crushers',
+                sets: [
+                    { id: '1', weight: 20, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 22, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 22, reps: 10, status: models_1.StatusEnum.NotStarted },
                 ],
             },
         ],
@@ -134,27 +161,63 @@ const SEED_WORKOUTS = [
                 id: '1',
                 name: 'Deadlift',
                 sets: [
-                    { id: '1', weight: 100, reps: 5, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 110, reps: 5, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 120, reps: 3, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 100, reps: 5, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 110, reps: 5, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 120, reps: 3, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '2',
                 name: 'Pull-ups',
                 sets: [
-                    { id: '1', weight: 0, reps: 10, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 0, reps: 8, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 0, reps: 6, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 0, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 6, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '3',
                 name: 'Barbell Rows',
                 sets: [
-                    { id: '1', weight: 60, reps: 8, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 65, reps: 8, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 65, reps: 8, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 60, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 65, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 65, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '4',
+                name: 'Face Pulls',
+                sets: [
+                    { id: '1', weight: 20, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 20, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 25, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '5',
+                name: 'Bicep Curls',
+                sets: [
+                    { id: '1', weight: 15, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 17, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 17, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Shrugs',
+                sets: [
+                    { id: '1', weight: 40, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 45, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 45, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '7',
+                name: 'Reverse Flyes',
+                sets: [
+                    { id: '1', weight: 8, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 10, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 10, reps: 12, status: models_1.StatusEnum.NotStarted },
                 ],
             },
         ],
@@ -166,28 +229,363 @@ const SEED_WORKOUTS = [
                 id: '1',
                 name: 'Squats',
                 sets: [
-                    { id: '1', weight: 80, reps: 8, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 90, reps: 6, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 100, reps: 5, status: models_1.StatusEnum.Pending },
-                    { id: '4', weight: 100, reps: 5, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 80, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 90, reps: 6, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 100, reps: 5, status: models_1.StatusEnum.NotStarted },
+                    { id: '4', weight: 100, reps: 5, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '2',
                 name: 'Leg Press',
                 sets: [
-                    { id: '1', weight: 120, reps: 12, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 140, reps: 10, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 150, reps: 8, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 120, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 140, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 150, reps: 8, status: models_1.StatusEnum.NotStarted },
                 ],
             },
             {
                 id: '3',
+                name: 'Romanian Deadlifts',
+                sets: [
+                    { id: '1', weight: 60, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 70, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 75, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '4',
                 name: 'Leg Curls',
                 sets: [
-                    { id: '1', weight: 40, reps: 12, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: 45, reps: 10, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: 45, reps: 10, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 40, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 45, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 45, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '5',
+                name: 'Leg Extensions',
+                sets: [
+                    { id: '1', weight: 50, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 55, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 60, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Calf Raises',
+                sets: [
+                    { id: '1', weight: 60, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 70, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 70, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '7',
+                name: 'Walking Lunges',
+                sets: [
+                    { id: '1', weight: 20, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 20, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 25, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'Push Day B',
+        exercises: [
+            {
+                id: '1',
+                name: 'Incline Barbell Press',
+                sets: [
+                    { id: '1', weight: 50, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 55, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 60, reps: 6, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '2',
+                name: 'Dumbbell Shoulder Press',
+                sets: [
+                    { id: '1', weight: 20, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 22, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 22, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '3',
+                name: 'Cable Flyes',
+                sets: [
+                    { id: '1', weight: 15, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 17, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 17, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '4',
+                name: 'Arnold Press',
+                sets: [
+                    { id: '1', weight: 18, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 20, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 20, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '5',
+                name: 'Overhead Tricep Extension',
+                sets: [
+                    { id: '1', weight: 20, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 22, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 22, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Pec Deck',
+                sets: [
+                    { id: '1', weight: 40, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 45, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 50, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '7',
+                name: 'Rope Tricep Pushdowns',
+                sets: [
+                    { id: '1', weight: 25, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 27, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 30, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '8',
+                name: 'Dips',
+                sets: [
+                    { id: '1', weight: 0, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'Pull Day B',
+        exercises: [
+            {
+                id: '1',
+                name: 'Weighted Pull-ups',
+                sets: [
+                    { id: '1', weight: 10, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 10, reps: 6, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 12, reps: 5, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '2',
+                name: 'Lat Pulldown',
+                sets: [
+                    { id: '1', weight: 60, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 65, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 70, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '3',
+                name: 'Seated Cable Rows',
+                sets: [
+                    { id: '1', weight: 50, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 55, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 55, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '4',
+                name: 'T-Bar Rows',
+                sets: [
+                    { id: '1', weight: 40, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 45, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 50, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '5',
+                name: 'Hammer Curls',
+                sets: [
+                    { id: '1', weight: 15, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 17, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 17, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Preacher Curls',
+                sets: [
+                    { id: '1', weight: 12, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 15, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 15, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '7',
+                name: 'Cable Face Pulls',
+                sets: [
+                    { id: '1', weight: 25, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 27, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 30, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '8',
+                name: 'Farmer Walks',
+                sets: [
+                    { id: '1', weight: 30, reps: 40, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 35, reps: 30, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 40, reps: 25, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'Full Body',
+        exercises: [
+            {
+                id: '1',
+                name: 'Squats',
+                sets: [
+                    { id: '1', weight: 70, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 80, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 85, reps: 6, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '2',
+                name: 'Bench Press',
+                sets: [
+                    { id: '1', weight: 55, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 60, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 65, reps: 6, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '3',
+                name: 'Bent Over Rows',
+                sets: [
+                    { id: '1', weight: 50, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 55, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 55, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '4',
+                name: 'Overhead Press',
+                sets: [
+                    { id: '1', weight: 35, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 37, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 40, reps: 6, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '5',
+                name: 'Romanian Deadlifts',
+                sets: [
+                    { id: '1', weight: 60, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 70, reps: 8, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 75, reps: 6, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Dumbbell Flyes',
+                sets: [
+                    { id: '1', weight: 15, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 17, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 17, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '7',
+                name: 'Lat Pulldown',
+                sets: [
+                    { id: '1', weight: 55, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 60, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 65, reps: 8, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '8',
+                name: 'Leg Curls',
+                sets: [
+                    { id: '1', weight: 35, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 40, reps: 10, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 40, reps: 10, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '9',
+                name: 'Core Circuit',
+                sets: [
+                    { id: '1', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'Quick HIIT',
+        exercises: [
+            {
+                id: '1',
+                name: 'Burpees',
+                sets: [
+                    { id: '1', weight: 0, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 15, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '2',
+                name: 'Mountain Climbers',
+                sets: [
+                    { id: '1', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '3',
+                name: 'Jump Squats',
+                sets: [
+                    { id: '1', weight: 0, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 12, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '4',
+                name: 'Push-ups',
+                sets: [
+                    { id: '1', weight: 0, reps: 20, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 15, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 12, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '5',
+                name: 'High Knees',
+                sets: [
+                    { id: '1', weight: 0, reps: 30, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 30, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 30, status: models_1.StatusEnum.NotStarted },
+                ],
+            },
+            {
+                id: '6',
+                name: 'Plank',
+                sets: [
+                    { id: '1', weight: 0, reps: 60, status: models_1.StatusEnum.NotStarted },
+                    { id: '2', weight: 0, reps: 45, status: models_1.StatusEnum.NotStarted },
+                    { id: '3', weight: 0, reps: 30, status: models_1.StatusEnum.NotStarted },
                 ],
             },
         ],
@@ -206,11 +604,12 @@ async function seedWorkouts() {
         // console.log('Cleared existing workouts');
         // Add seed workouts
         for (const workout of SEED_WORKOUTS) {
+            const now = new Date().toISOString();
             const docRef = await workoutsCollection.add({
                 ...workout,
-                createdAt: new Date().toISOString(),
-                isActive: false,
                 userId: '007',
+                createdAt: now,
+                updatedAt: now,
             });
             console.log(`Created workout "${workout.name}" with ID: ${docRef.id}`);
         }

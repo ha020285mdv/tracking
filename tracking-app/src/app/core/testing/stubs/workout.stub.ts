@@ -1,6 +1,6 @@
 import { Status } from '../../enums/status.enum';
 import { Workout } from '../../models/workout.model';
-
+/* 
 export const mockWorkout = (): Workout => structuredClone(MOCK_WORKOUT);
 
 const MOCK_WORKOUT: Workout = {
@@ -55,3 +55,4 @@ const MOCK_WORKOUT: Workout = {
     },
   ],
 };
+ */
