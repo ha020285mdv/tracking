@@ -1,16 +1,25 @@
 import { Routes } from '@angular/router';
-import { ActiveWorkout } from './core/pages/active-workout/active-workout';
-import { LandingPage } from './core/pages/landing-page/landing-page';
+import { HomePage } from './core/pages/home-page/home-page';
 import { PageNotFound } from './core/pages/page-not-found/page-not-found';
+import { WorkoutsPage } from './core/pages/workouts-page/workouts-page';
+import { workoutResolver } from './core/resolvers/workout.resolver';
+import { WorkoutPage } from './core/pages/workout-page/workout-page';
 
 export const routes: Routes = [
   {
     path: '',
-    component: LandingPage,
+    component: HomePage,
   },
   {
-    path: 'active',
-    component: ActiveWorkout,
+    path: 'workouts',
+    component: WorkoutsPage,
+  },
+  {
+    path: 'workouts/:id',
+    component: WorkoutPage,
+    resolve: {
+      workout: workoutResolver,
+    },
   },
   {
     path: '**',

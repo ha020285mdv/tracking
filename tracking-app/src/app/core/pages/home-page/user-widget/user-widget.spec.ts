@@ -1,17 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ActiveWorkout } from './active-workout';
+import { UserWidget } from './user-widget';
 
-describe('ActiveWorkout', () => {
-  let component: ActiveWorkout;
-  let fixture: ComponentFixture<ActiveWorkout>;
+describe('UserWidget', () => {
+  let component: UserWidget;
+  let fixture: ComponentFixture<UserWidget>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActiveWorkout],
-    }).compileComponents();
+      imports: [UserWidget]
+    })
+    .compileComponents();
 
-    fixture = TestBed.createComponent(ActiveWorkout);
+    fixture = TestBed.createComponent(UserWidget);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

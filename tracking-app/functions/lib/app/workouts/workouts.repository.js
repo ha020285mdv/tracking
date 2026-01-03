@@ -14,13 +14,16 @@ async function createWorkout(training) {
     });
     return { ...training, id: ref.id };
 }
-async function getWorkoutByUserId(userId) {
-    const snapshot = await firebase_admin_1.db.collection('workouts').where('userId', '==', userId).limit(1).get();
-    if (snapshot.empty) {
-        return null;
+async function getWorkoutByUserId(userId, limit) {
+    let query = firebase_admin_1.db.collection('workouts').where('userId', '==', userId);
+    if (limit) {
+        query = query.limit(limit);
     }
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+    const snapshot = await query.get();
+    if (snapshot.empty) {
+        return [];
+    }
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 async function getWorkoutById(id) {
     const doc = await firebase_admin_1.db.collection('workouts').doc(id).get();

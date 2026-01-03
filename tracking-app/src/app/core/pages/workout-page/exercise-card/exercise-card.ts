@@ -15,8 +15,8 @@ import { catchError, switchMap, take } from 'rxjs';
 })
 export class ExerciseCard {
   private readonly workoutService = inject(WorkoutService);
-
   public readonly status = Status;
+
   public readonly workoutId = input.required<string>();
   public readonly exercise = input.required<Exercise>();
 

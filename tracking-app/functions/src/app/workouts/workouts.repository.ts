@@ -9,13 +9,18 @@ export async function createWorkout(training: WorkoutDto): Promise<WorkoutDto> {
   return { ...training, id: ref.id };
 }
 
-export async function getWorkoutByUserId(userId: string) {
-  const snapshot = await db.collection('workouts').where('userId', '==', userId).limit(1).get();
-  if (snapshot.empty) {
-    return null;
+export async function getWorkoutByUserId(userId: string, limit?: number): Promise<WorkoutDto[]> {
+  let query = db.collection('workouts').where('userId', '==', userId);
+
+  if (limit) {
+    query = query.limit(limit);
   }
-  const doc = snapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as WorkoutDto;
+
+  const snapshot = await query.get();
+  if (snapshot.empty) {
+    return [];
+  }
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WorkoutDto));
 }
 
 export async function getWorkoutById(id: string) {

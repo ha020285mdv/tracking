@@ -48,9 +48,9 @@ const MOCK_WORKOUT: Workout = {
       id: '5',
       name: 'Push-ups',
       sets: [
-        { id: '1', weight: null, reps: 20, status: Status.Pending },
-        { id: '2', weight: null, reps: 15, status: Status.Pending },
-        { id: '3', weight: null, reps: 12, status: Status.Pending },
+        { id: '1', weight: 0, reps: 20, status: Status.Pending },
+        { id: '2', weight: 0, reps: 15, status: Status.Pending },
+        { id: '3', weight: 0, reps: 12, status: Status.Pending },
       ],
     },
   ],

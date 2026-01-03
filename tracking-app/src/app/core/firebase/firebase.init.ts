@@ -1,4 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from './firebase.config';
 
-export const firebaseApp = initializeApp(firebaseConfig);
+// Initialize Firebase with automaticDataCollectionEnabled disabled to prevent auto-initialization errors
+export const firebaseApp = initializeApp(firebaseConfig, {
+  automaticDataCollectionEnabled: false,
+});

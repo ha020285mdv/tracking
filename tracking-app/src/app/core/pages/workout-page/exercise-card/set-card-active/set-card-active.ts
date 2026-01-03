@@ -14,10 +14,11 @@ export class SetCardActive {
   public readonly set = input.required<ExerciseSet>();
   public readonly complete = output<ExerciseSet>();
 
-  public readonly weightActual = signal<number | null>(null);
+  public readonly weightActual = signal<number>(0);
   public readonly repsActual = signal<number>(10);
 
   private readonly minReps = 1;
+  private readonly minWeight = 0;
   private readonly step = 1;
 
   constructor() {
@@ -29,20 +30,24 @@ export class SetCardActive {
     });
   }
 
-  completeSet() {
+  completeSet(): void {
     this.complete.emit({
       ...this.set(),
       weight: this.weightActual(),
       reps: this.repsActual(),
       status: Status.Completed,
-    } satisfies ExerciseSet);
+    });
   }
 
   onIncrementWeight(): void {
-    this.weightActual.update((current) => (current !== null ? current + this.step : null));
+    this.weightActual.update((current) => current + this.step);
   }
+
   onDecrementWeight(): void {
-    this.weightActual.update((current) => (current !== null ? current - this.step : null));
+    this.weightActual.update((current) => {
+      if (current === this.minWeight) return current;
+      return current - this.step;
+    });
   }
 
   onIncrementReps(): void {

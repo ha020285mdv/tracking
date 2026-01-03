@@ -1,0 +1,18 @@
+<div class="flex-1 px-4 flex flex-col gap-8 overflow-y-auto">
+  <app-user-widget></app-user-widget>
+  <div class="flex flex-col gap-4">
+    <h2 class="px-2 text-xl font-bold text-text-main leading-tight">Choose Your Workout</h2>
+    <div class="flex flex-col gap-3">
+      @for (workout of workouts(); track workout.id) {
+      <app-workout-item [workout]="workout"></app-workout-item>
+      }
+      <button
+        routerLink="/workouts"
+        class="px-4 py-3 mt-2 text-sm font-medium text-text-main bg-transparent border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-black active:text-black transition-colors"
+      >
+        More workouts
+      </button>
+    </div>
+  </div>
+  <app-calendar></app-calendar>
+</div>

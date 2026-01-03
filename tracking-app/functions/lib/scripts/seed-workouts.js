@@ -120,9 +120,9 @@ const SEED_WORKOUTS = [
                 id: '5',
                 name: 'Push-ups',
                 sets: [
-                    { id: '1', weight: null, reps: 20, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: null, reps: 15, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: null, reps: 12, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 0, reps: 20, status: models_1.StatusEnum.Pending },
+                    { id: '2', weight: 0, reps: 15, status: models_1.StatusEnum.Pending },
+                    { id: '3', weight: 0, reps: 12, status: models_1.StatusEnum.Pending },
                 ],
             },
         ],
@@ -143,9 +143,9 @@ const SEED_WORKOUTS = [
                 id: '2',
                 name: 'Pull-ups',
                 sets: [
-                    { id: '1', weight: null, reps: 10, status: models_1.StatusEnum.Pending },
-                    { id: '2', weight: null, reps: 8, status: models_1.StatusEnum.Pending },
-                    { id: '3', weight: null, reps: 6, status: models_1.StatusEnum.Pending },
+                    { id: '1', weight: 0, reps: 10, status: models_1.StatusEnum.Pending },
+                    { id: '2', weight: 0, reps: 8, status: models_1.StatusEnum.Pending },
+                    { id: '3', weight: 0, reps: 6, status: models_1.StatusEnum.Pending },
                 ],
             },
             {

@@ -20,7 +20,8 @@ export const createWorkoutHandler = async (req: Request, res: Response) => {
 export const getWorkoutByUserIdHandler = async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId as string;
-    const result = await getWorkoutByUserId(userId);
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+    const result = await getWorkoutByUserId(userId, limit);
     res.status(200).json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

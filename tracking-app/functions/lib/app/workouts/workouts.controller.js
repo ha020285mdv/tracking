@@ -16,7 +16,8 @@ exports.createWorkoutHandler = createWorkoutHandler;
 const getWorkoutByUserIdHandler = async (req, res) => {
     try {
         const userId = req.query.userId;
-        const result = await (0, workouts_repository_1.getWorkoutByUserId)(userId);
+        const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
+        const result = await (0, workouts_repository_1.getWorkoutByUserId)(userId, limit);
         res.status(200).json(result);
     }
     catch (err) {

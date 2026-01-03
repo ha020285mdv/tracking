@@ -14,6 +14,7 @@ export class WorkoutService {
   // TODO: maybe delete?
   private readonly _currentWorkout$ = new BehaviorSubject<Workout | null>(null);
 
+  // used
   get currentWorkout$(): Observable<Workout | null> {
     return this._currentWorkout$.asObservable();
   }
@@ -26,11 +27,22 @@ export class WorkoutService {
     return this.http.get<Workout>(`${environment.firebaseApiBase}/workouts/${id}`);
   }
 
+  /*    
   getWorkoutsByUserId$(userId: string): Observable<Workout> {
     const params = new HttpParams().set('userId', userId);
     return this.http.get<Workout>(`${environment.firebaseApiBase}/workouts`, { params });
   }
+   */
 
+  getWorkoutsByUserId$(userId: string, limit?: number): Observable<Workout[]> {
+    let params = new HttpParams().set('userId', userId);
+    if (limit) {
+      params = params.set('limit', limit.toString());
+    }
+    return this.http.get<Workout[]>(`${environment.firebaseApiBase}/workouts`, { params });
+  }
+
+  //used
   activateSet(workoutId: string, exerciseId: string, setId: string): Observable<Workout> {
     return this.http.post<Workout>(
       `${environment.firebaseApiBase}/workouts/${workoutId}/activate-set`,
@@ -38,6 +50,7 @@ export class WorkoutService {
     );
   }
 
+  //used
   completeSet(workoutId: string, exerciseId: string, set: ExerciseSet): Observable<Workout> {
     return this.http.post<Workout>(
       `${environment.firebaseApiBase}/workouts/${workoutId}/complete-set`,
@@ -51,6 +64,7 @@ export class WorkoutService {
     );
   }
 
+  //used
   setCurrentWorkout(workout: Workout | null): void {
     this._currentWorkout$.next(workout);
   }

@@ -1,0 +1,34 @@
+import { Component, DestroyRef, inject } from '@angular/core';
+import { WorkoutService } from '../../services/workout.service';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, of } from 'rxjs';
+import { Calendar } from './calendar/calendar';
+import { UserWidget } from './user-widget/user-widget';
+import { WorkoutItem } from '../../components/workout-item/workout-item';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-landing-page',
+  imports: [Calendar, UserWidget, WorkoutItem, RouterLink],
+  templateUrl: './home-page.html',
+  styleUrl: './home-page.scss',
+})
+export class HomePage {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly workoutService = inject(WorkoutService);
+
+  private readonly workoutsLimit = 2;
+  private readonly userId = '007'; // TODO: get from auth service
+
+  protected readonly workouts = toSignal(
+    this.workoutService.getWorkoutsByUserId$(this.userId, this.workoutsLimit).pipe(
+      // TODO: handle errors
+      catchError((error) => {
+        console.error('Error fetching workouts', error);
+        return of([]);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ),
+    { initialValue: [] }
+  );
+}
