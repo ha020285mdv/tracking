@@ -14,12 +14,12 @@ export class SetCardActive {
   public readonly set = input.required<ExerciseSet>();
   public readonly complete = output<ExerciseSet>();
 
-  public readonly weightActual = signal<number>(0);
-  public readonly repsActual = signal<number>(10);
-
   private readonly minReps = 1;
   private readonly minWeight = 0;
   private readonly step = 1;
+
+  public readonly weightActual = signal<number>(this.minWeight);
+  public readonly repsActual = signal<number>(this.minReps);
 
   constructor() {
     effect(() => {

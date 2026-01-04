@@ -6,7 +6,7 @@ import { WorkoutService } from '../services/workout.service';
 
 export const workoutResolver: ResolveFn<Workout | null> = (
   route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot
+  _: RouterStateSnapshot
 ): Observable<Workout | null> => {
   const id: string | null = route.params?.['id'];
 

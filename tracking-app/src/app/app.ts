@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { Header } from './core/components/header/header';
 import { WorkoutService } from './core/services/workout.service';
 import { AuthService } from './core/services/auth.service';
-import { filter, switchMap, catchError, of } from 'rxjs';
+import { switchMap, catchError, of } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -25,10 +25,10 @@ export class App implements OnInit {
       .pipe(
         switchMap((user) => {
           if (user) {
-            // User is authenticated, fetch their active session
+            // user is authenticated, fetch active session
             return this.workoutService.getActiveSession$();
           } else {
-            // User is logged out, clear the active session
+            // user is logged out, clear active session
             this.workoutService.clearActiveSession();
             return of(null);
           }

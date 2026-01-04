@@ -1,9 +1,9 @@
 import type { Environment } from './environment.model';
-import packageInfo from '../../package.json';
 
-export const environment = {
+export const environment: Environment = {
   production: false,
   firebaseApiBase: 'https://europe-west1-easyworkouttrack.cloudfunctions.net/api',
+  apiHostMarker: 'cloudfunctions.net',
   firebase: {
     apiKey: 'AIzaSyCTtKdnTSGv9ZD4jpYCvYaeSl4n9RV545s',
     authDomain: 'easyworkouttrack.firebaseapp.com',

@@ -2,6 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { from, switchMap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 /**
  * HTTP Interceptor that automatically adds Firebase ID token to all requests
@@ -10,7 +11,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
 
   // Only add auth header for API requests
-  if (!req.url.includes('cloudfunctions.net')) {
+  if (!req.url.includes(environment.apiHostMarker)) {
     return next(req);
   }
 

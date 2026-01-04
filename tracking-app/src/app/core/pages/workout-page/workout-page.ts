@@ -1,10 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Workout } from '../../models/workout.model';
 import { map, take } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ExerciseCard } from '../../components/exercise-card/exercise-card';
 import { WorkoutService } from '../../services/workout.service';
+import { HttpStatusCode } from '@angular/common/http';
 
 @Component({
   selector: 'app-workout-page',
@@ -29,7 +30,7 @@ export class WorkoutPage {
     }
   );
 
-  onStartWorkout() {
+  onStartWorkout(): void {
     if (this.isThereActiveSession()) {
       return;
     }
@@ -48,7 +49,7 @@ export class WorkoutPage {
         },
         error: (error) => {
           // if there's already an active session (409), navigate to it
-          if (error.status === 409) {
+          if (error.status === HttpStatusCode.Conflict) {
             this.router.navigate(['/session']);
           } else {
             console.error('Error starting workout:', error);

@@ -20,7 +20,7 @@ export class LoginPage {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  handleEmailAuth() {
+  handleEmailAuth(): void {
     this.error.set(null);
     this.isLoading.set(true);
 
@@ -42,7 +42,7 @@ export class LoginPage {
     });
   }
 
-  handleGoogleSignIn() {
+  handleGoogleSignIn(): void {
     this.error.set(null);
     this.isLoading.set(true);
 
@@ -60,7 +60,7 @@ export class LoginPage {
     });
   }
 
-  toggleMode() {
+  toggleMode(): void {
     this.isSignUp.set(!this.isSignUp());
     this.error.set(null);
   }

@@ -24,12 +24,12 @@ export class SessionPage {
   });
 
   public readonly progress = computed(() => {
-    const s = this.session();
-    if (!s) {
+    const sessionValue = this.session();
+    if (!sessionValue) {
       return 0;
     }
-    const totalSets = s.currentState.reduce((total, exercise) => total + exercise.sets.length, 0);
-    const completedSets = s.currentState.reduce(
+    const totalSets = sessionValue.currentState.reduce((total, exercise) => total + exercise.sets.length, 0);
+    const completedSets = sessionValue.currentState.reduce(
       (total, exercise) =>
         total + exercise.sets.filter((set) => set.status === Status.Completed).length,
       0
@@ -38,7 +38,7 @@ export class SessionPage {
     return totalSets === 0 ? 0 : Math.round((completedSets / totalSets) * 100);
   });
 
-  finishWorkout(): void {
+  finish(): void {
     const sessionId = this.session()?.id;
     if (!sessionId) {
       return;

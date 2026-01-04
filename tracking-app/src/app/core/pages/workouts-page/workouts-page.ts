@@ -1,5 +1,4 @@
-import { Component, DestroyRef, inject, input } from '@angular/core';
-import { Workout } from '../../models/workout.model';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { WorkoutItem } from '../../components/workout-item/workout-item';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { WorkoutService } from '../../services/workout.service';

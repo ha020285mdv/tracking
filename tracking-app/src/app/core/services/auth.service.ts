@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  AuthError,
 } from 'firebase/auth';
 import { Observable, from, map, catchError, throwError } from 'rxjs';
 import { FIREBASE_AUTH } from '../firebase/firebase.tokens';
@@ -93,7 +94,7 @@ export class AuthService {
   }
 
   // handle Firebase Auth errors
-  private handleAuthError(error: any): Error {
+  private handleAuthError(error: AuthError): Error {
     switch (error.code) {
       case 'auth/invalid-email':
         return new Error('Invalid email address');

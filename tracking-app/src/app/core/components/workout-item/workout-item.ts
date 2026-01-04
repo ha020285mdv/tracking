@@ -15,8 +15,4 @@ export class WorkoutItem {
   public readonly setsCount = computed(() =>
     this.workout().exercises.reduce((acc, exercise) => acc + exercise.sets.length, 0)
   );
-
-  public startWorkout() {
-    throw new Error('Method not implemented.');
-  }
 }
