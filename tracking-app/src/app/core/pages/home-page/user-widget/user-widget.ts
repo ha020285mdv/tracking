@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AuthService } from '../../../services/auth.service';
+import { User } from 'firebase/auth';
 
 @Component({
   selector: 'app-user-widget',
@@ -7,5 +9,9 @@ import { Component } from '@angular/core';
   styleUrl: './user-widget.scss',
 })
 export class UserWidget {
+  private readonly authService = inject(AuthService);
 
+  get user(): User | null {
+    return this.authService.currentUser();
+  }
 }

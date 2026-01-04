@@ -17,11 +17,16 @@ export class ExerciseCard {
   private readonly workoutService = inject(WorkoutService);
   public readonly status = Status;
 
-  public readonly sessionId = input.required<string>();
+  public readonly sessionId = input<string | null>(null); // should be provided when used in a session context
   public readonly exercise = input.required<Exercise>();
 
   onSetActivate($event: ExerciseSet): void {
     const sessionId = this.sessionId();
+
+    if (!sessionId) {
+      return;
+    }
+
     this.workoutService
       .activateSet(sessionId, this.exercise().id, $event.id)
       .pipe(take(1))
@@ -34,6 +39,11 @@ export class ExerciseCard {
 
   onSetComplete($event: ExerciseSet): void {
     const sessionId = this.sessionId();
+
+    if (!sessionId) {
+      return;
+    }
+
     this.workoutService
       .completeSet(sessionId, this.exercise().id, $event)
       .pipe(take(1))

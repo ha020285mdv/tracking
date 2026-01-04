@@ -1,18 +1,20 @@
 <div class="flex flex-col gap-4">
   <h2 class="px-2 text-xl font-bold text-text-main leading-tight">{{ exercise().name }}</h2>
   <div class="flex flex-col gap-3">
-    @for (set of exercise().sets; track set.id) { @if (set.status === status.Active) {
-    <app-set-card-active
-      [index]="$index + 1"
-      [set]="set"
-      (complete)="onSetComplete($event)"
-    ></app-set-card-active>
-    } @else {
-    <app-set-card
-      [index]="$index + 1"
-      [set]="set"
-      (activate)="onSetActivate($event)"
-    ></app-set-card>
-    } }
+    @for (set of exercise().sets; track set.id) { 
+      @if (set.status !== status.Active) {
+        <app-set-card
+          [index]="$index + 1"
+          [set]="set"
+          (activate)="onSetActivate($event)"
+        ></app-set-card>
+      } @else {
+        <app-set-card-active
+          [index]="$index + 1"
+          [set]="set"
+          (complete)="onSetComplete($event)"
+        ></app-set-card-active>
+      } 
+    }
   </div>
 </div>

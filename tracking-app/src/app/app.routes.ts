@@ -8,6 +8,8 @@ import { workoutResolver } from './core/resolvers/workout.resolver';
 import { activeSessionResolver } from './core/resolvers/active-session.resolver';
 import { SessionPage } from './core/pages/session-page/session-page';
 import { authGuard, publicGuard } from './core/guards/auth.guard';
+import { HistoryPage } from './core/pages/history-page/history-page';
+import { historyResolver } from './core/resolvers/history.resolver';
 
 export const routes: Routes = [
   {
@@ -38,6 +40,12 @@ export const routes: Routes = [
     component: SessionPage,
     canActivate: [authGuard],
     resolve: { session: activeSessionResolver },
+  },
+  {
+    path: 'history',
+    component: HistoryPage,
+    canActivate: [authGuard],
+    resolve: { history: historyResolver },
   },
   {
     path: '**',

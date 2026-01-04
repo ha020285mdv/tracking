@@ -30,10 +30,15 @@ export class WorkoutPage {
   );
 
   onStartWorkout() {
+    if (this.isThereActiveSession()) {
+      return;
+    }
+
     const templateId = this.workout()?.id;
     if (!templateId) {
       return;
     }
+
     this.workoutService
       .startWorkout$(templateId)
       .pipe(take(1))

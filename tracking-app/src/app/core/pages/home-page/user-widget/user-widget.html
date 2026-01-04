@@ -5,15 +5,24 @@
     <div
       class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 text-primary shrink-0"
     >
-      <span class="material-symbols-outlined text-[28px]">person</span>
+      @if (user?.photoURL) {
+        <img [src]="user?.photoURL" alt="User Avatar" class="w-12 h-12 rounded-full object-cover" />
+      } @else {
+        <span class="material-symbols-outlined text-[28px]">person</span>
+      }
     </div>
     <div class="flex flex-col flex-1">
-      <p class="text-lg font-bold text-text-main">Welcome!</p>
-      <button
-        class="w-full text-left text-sm font-bold text-primary hover:text-primary/80 transition-colors mt-1"
-      >
-        Log In / Sign Up
-      </button>
+      <p class="text-lg font-bold text-text-main">
+        Welcome{{ user?.displayName ? `, ${user?.displayName}` : '' }}!
+      </p>
+      @if (!user) {
+        <button
+          routerLink="/login"
+          class="w-full text-left text-sm font-bold text-primary hover:text-primary/80 transition-colors mt-1"
+        >
+          Sign In / Sign Up
+        </button>
+      }
     </div>
   </div>
 </div>
