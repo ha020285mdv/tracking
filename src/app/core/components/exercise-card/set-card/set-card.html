@@ -1,43 +1,86 @@
 @let setValue = set(); @let completed = setValue.status === status.Completed;
+@let locked = isLocked(); @let timed = isTimed();
 
-<div
-  class="group relative flex items-center justify-between px-4 py-3 bg-card-dark rounded-xl shadow-sm border border-transparent opacity-70 transition-opacity"
-  (click)="activateSet()"
->
-  <div class="flex items-center gap-4 flex-1">
+@if (locked || completed) {
+  <!-- Locked/Completed set - thin compact view -->
+  <div
+    class="flex items-center gap-3 px-3 py-1.5 rounded-lg"
+    [class.bg-card-dark/50]="locked"
+    [class.opacity-40]="locked"
+    [class.cursor-not-allowed]="locked"
+    [class.bg-primary/10]="completed"
+    [class.border]="completed"
+    [class.border-primary/20]="completed"
+  >
     @if (completed) {
-    <div
-      class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary shrink-0"
-    >
-      <span class="material-symbols-outlined text-[20px]">check</span>
-    </div>
+      <div
+        class="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary shrink-0"
+      >
+        <span class="material-symbols-outlined text-[14px]">check</span>
+      </div>
     } @else {
-    <div
-      class="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-gray-400 shrink-0"
-    >
-      <span class="text-sm font-bold">{{ index() }}</span>
-    </div>
+      <div
+        class="flex items-center justify-center w-6 h-6 rounded-full bg-white/5 text-gray-500 shrink-0"
+      >
+        <span class="text-xs font-medium">{{ index() }}</span>
+      </div>
     }
-    <div class="flex flex-col">
-      <p
-        class="text-sm font-bold text-text-main leading-tight opacity-70"
+    @if (timed) {
+      <div
+        class="flex items-center gap-2 text-xs"
+        [class.text-primary]="completed"
+        [class.text-text-muted]="!completed"
+      >
+        <span class="material-symbols-outlined text-[14px]">timer</span>
+        <span [class.line-through]="completed">{{ formatDuration(setValue.duration) }}</span>
+      </div>
+    } @else {
+      <span
+        class="text-xs"
+        [class.text-primary]="completed"
+        [class.text-text-muted]="!completed"
         [class.line-through]="completed"
       >
         {{ setValue.weight ? setValue.weight : 'BW' }} kg × {{ setValue.reps }}
-      </p>
+      </span>
+    }
+    @if (completed) {
+      <span class="ml-auto text-[10px] text-primary font-bold uppercase">Done</span>
+    }
+  </div>
+} @else {
+  <!-- Pending/Next set view (can be activated) -->
+  <div
+    class="group relative flex items-center justify-between px-4 py-3 bg-card-dark rounded-xl shadow-sm border border-transparent transition-all opacity-70 cursor-pointer hover:border-white/10"
+    (click)="activateSet()"
+  >
+    <div class="flex items-center gap-4 flex-1">
       <div
-        [class]="completed ? 'text-primary' : 'text-text-muted'"
-        class="flex items-center gap-2 mt-0.5 font-bold uppercase tracking-wider text-[10px]"
+        class="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-gray-400 shrink-0"
       >
-        {{ setValue.status | setStatusToString }}
+        <span class="text-sm font-bold">{{ index() }}</span>
+      </div>
+      <div class="flex flex-col">
+        @if (timed) {
+          <!-- Timed set display -->
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-blue-400">timer</span>
+            <p class="text-lg font-bold text-text-main leading-tight font-mono">
+              {{ formatDuration(setValue.duration) }}
+            </p>
+          </div>
+        } @else {
+          <!-- Standard set display -->
+          <p class="text-sm font-bold text-text-main leading-tight opacity-70">
+            {{ setValue.weight ? setValue.weight : 'BW' }} kg × {{ setValue.reps }}
+          </p>
+        }
+        <div
+          class="flex items-center gap-2 mt-0.5 font-bold uppercase tracking-wider text-[10px] text-text-muted"
+        >
+          {{ setValue.status | setStatusToString }}
+        </div>
       </div>
     </div>
   </div>
-  @if (completed) {
-  <div
-    class="w-8 h-8 rounded-full bg-primary text-black flex items-center justify-center shadow-sm"
-  >
-    <span class="material-symbols-outlined text-[18px] font-bold">check</span>
-  </div>
-  }
-</div>
+}

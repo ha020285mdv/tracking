@@ -4,8 +4,13 @@ import {
   createWorkout,
   getWorkoutByUserId,
   getWorkoutById,
+  getFavoriteWorkoutsByUserId,
+  toggleFavoriteWorkout,
+  updateWorkout,
+  deleteWorkout,
   activateSet,
   completeSet,
+  deactivateOtherSets,
   startWorkoutSession,
   getActiveSessionByUserId,
   getActiveSessionById,
@@ -36,12 +41,94 @@ export const getWorkoutByUserIdHandler = async (req: AuthenticatedRequest, res: 
   }
 };
 
+export const getFavoriteWorkoutsHandler = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+    const result = await getFavoriteWorkoutsByUserId(userId, limit);
+    res.status(200).json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const toggleFavoriteHandler = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { id } = req.params;
+    // temporary debug logging to help trace authorization issues
+    console.log('[toggleFavoriteHandler] authUser:', userId, 'workoutId:', id);
+    const result = await toggleFavoriteWorkout(userId, id);
+    if (result) {
+      console.log('[toggleFavoriteHandler] workoutId:', result.id, 'favorite:', result.favorite);
+    }
+    if (!result) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (err.message.includes('Not authorized')) {
+      return res.status(403).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const getWorkoutByIdHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id;
     const result = await getWorkoutById(id);
     res.status(200).json(result);
   } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateWorkoutHandler = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { id } = req.params;
+    const { name, description, exercises } = req.body;
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (exercises !== undefined) updates.exercises = exercises;
+
+    const result = await updateWorkout(userId, id, updates);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (err.message.includes('Not authorized')) {
+      return res.status(403).json({ error: err.message });
+    }
+    if (err.message.includes('deleted')) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const deleteWorkoutHandler = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { id } = req.params;
+
+    const result = await deleteWorkout(userId, id);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+
+    res.status(200).json({ message: 'Workout deleted successfully', workout: result });
+  } catch (err: any) {
+    if (err.message.includes('Not authorized')) {
+      return res.status(403).json({ error: err.message });
+    }
     res.status(500).json({ error: err.message });
   }
 };
@@ -62,6 +149,17 @@ export const completeSetHandler = async (req: AuthenticatedRequest, res: Respons
     const { sessionId } = req.params;
     const { exerciseId, set } = req.body;
     const result = await completeSet(sessionId, exerciseId, set);
+    res.status(200).json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const deactivateOtherSetsHandler = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const { exceptExerciseId } = req.body;
+    const result = await deactivateOtherSets(sessionId, exceptExerciseId);
     res.status(200).json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -152,7 +250,9 @@ export const getWorkoutHistoryHandler = async (req: AuthenticatedRequest, res: R
   try {
     const userId = req.userId!;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
-    const result = await getWorkoutHistoryByUserId(userId, limit);
+    const from = req.query.from as string | undefined;
+    const to = req.query.to as string | undefined;
+    const result = await getWorkoutHistoryByUserId(userId, { limit, from, to });
     res.status(200).json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

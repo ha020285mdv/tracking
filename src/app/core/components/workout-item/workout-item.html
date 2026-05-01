@@ -1,11 +1,96 @@
 <div
   [routerLink]="['/workouts', workout().id]"
   [state]="{ workout: workout() }"
+  [class.favorite]="workout().favorite"
   class="group relative flex flex-col gap-2 p-4 bg-card-dark rounded-xl shadow-sm border border-transparent hover:border-primary/50 transition-colors"
 >
   <div class="flex items-center justify-between">
-    <p class="text-base font-bold text-text-main leading-tight">{{ workout().name }}</p>
-    <span class="text-xs font-bold bg-primary px-2 py-0.5 rounded text-black">Intermediate</span>
+    <p class="text-base font-bold text-text-main leading-tight">
+      <span class="workout-name">{{ workout().name }}</span>
+      <span class="ml-2 text-yellow-400" *ngIf="workout().favorite" title="Favorite">★</span>
+    </p>
+    <div class="flex items-center gap-2 relative">
+      <span class="text-xs font-bold bg-primary px-2 py-0.5 rounded text-black">Intermediate</span>
+
+      <button
+        type="button"
+        (click)="onToggleMenu($event)"
+        aria-label="More options"
+        class="p-1 rounded-full hover:bg-gray-700"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="12" cy="5" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="12" cy="19" r="2" />
+        </svg>
+      </button>
+
+      <div
+        class="absolute right-0 mt-2 w-44 menu-dropdown rounded shadow-md z-10"
+        [hidden]="!isMenuOpen()"
+      >
+        <button
+          type="button"
+          class="w-full text-left px-3 py-2 hover:bg-gray-100 menu-item"
+          (click)="onMakeFavorite($event)"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+            />
+          </svg>
+          <span>{{ workout().favorite ? 'Unfavorite' : 'Make favorite' }}</span>
+        </button>
+        <button
+          type="button"
+          class="w-full text-left px-3 py-2 hover:bg-gray-100 menu-item"
+          (click)="onEdit($event)"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
+            />
+          </svg>
+          <span>Edit</span>
+        </button>
+        <button
+          type="button"
+          class="w-full text-left px-3 py-2 text-red-500 hover:bg-gray-100 menu-item"
+          (click)="onDelete($event)"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+            />
+          </svg>
+          <span>Delete</span>
+        </button>
+      </div>
+    </div>
   </div>
   <div class="flex items-center gap-3 text-sm text-text-muted">
     <span

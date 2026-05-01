@@ -5,8 +5,13 @@ import {
   createWorkoutHandler,
   getWorkoutByUserIdHandler,
   getWorkoutByIdHandler,
+  updateWorkoutHandler,
+  deleteWorkoutHandler,
+  getFavoriteWorkoutsHandler,
+  toggleFavoriteHandler,
   activateSetHandler,
   completeSetHandler,
+  deactivateOtherSetsHandler,
   startWorkoutHandler,
   getActiveSessionHandler,
   getActiveSessionByIdHandler,
@@ -29,7 +34,11 @@ trainingsApi.use(authenticateUser);
 // Workout Templates
 trainingsApi.post('/workouts', createWorkoutHandler);
 trainingsApi.get('/workouts', getWorkoutByUserIdHandler);
+trainingsApi.get('/workouts/favorites', getFavoriteWorkoutsHandler);
 trainingsApi.get('/workouts/:id', getWorkoutByIdHandler);
+trainingsApi.patch('/workouts/:id', updateWorkoutHandler);
+trainingsApi.delete('/workouts/:id', deleteWorkoutHandler);
+trainingsApi.post('/workouts/:id/favorite', toggleFavoriteHandler);
 
 // Active Sessions
 trainingsApi.post('/sessions/start', startWorkoutHandler);
@@ -38,6 +47,7 @@ trainingsApi.get('/sessions/:sessionId', getActiveSessionByIdHandler);
 trainingsApi.patch('/sessions/:sessionId', updateActiveSessionHandler);
 trainingsApi.post('/sessions/:sessionId/activate-set', activateSetHandler);
 trainingsApi.post('/sessions/:sessionId/complete-set', completeSetHandler);
+trainingsApi.post('/sessions/:sessionId/deactivate-others', deactivateOtherSetsHandler);
 trainingsApi.post('/sessions/:sessionId/finish', finishWorkoutHandler);
 
 // Workout History

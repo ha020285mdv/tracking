@@ -1,40 +1,46 @@
-@let sessionValue = session(); @if (sessionValue) {
-<div
-  class="pt-6 pb-2 px-4 sticky top-0 z-10 bg-background-dark/95 backdrop-blur-sm border-b border-white/5"
->
-  <!-- components header -->
-  <div class="flex flex-col gap-1 px-2">
-    <h1 class="text-3xl font-bold text-text-main tracking-tight">
-      {{ sessionValue.templateSnapshot.name }}
-    </h1>
-    <p class="text-text-muted font-medium text-sm flex items-center gap-1">
-      <!-- TODO: calculate and show real data -->
-      <span class="material-symbols-outlined text-[16px]">schedule</span> 45min
-      <span class="mx-1">•</span>
-      <span class="material-symbols-outlined text-[16px]">equalizer</span> Intermediate
-    </p>
-  </div>
-</div>
-<!-- progress-bar -->
-<app-progress-bar [progress]="progress()"></app-progress-bar>
-
-<!-- exercises -->
-<div class="flex-1 px-4 flex flex-col gap-8 pb-32 overflow-y-auto">
-  @for (exercise of sessionValue.currentState; track exercise.id) {
-  <app-exercise-card [exercise]="exercise" [sessionId]="sessionValue.id"></app-exercise-card>
-  }
-</div>
-
-<!-- finish btn -->
-<div
-  class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 bg-gradient-to-t from-background-dark via-background-dark to-transparent pointer-events-none z-30"
->
-  <button
-    (click)="finish()"
-    class="pointer-events-auto w-full h-14 bg-primary text-black font-bold text-lg rounded-full shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+@let sessionValue = session();
+@if (sessionValue) {
+  <div
+    class="pt-6 pb-2 px-4 sticky top-0 z-10 bg-background-dark/95 backdrop-blur-sm border-b border-white/5"
   >
-    <span class="material-symbols-outlined">flag</span>
-    Finish Workout
-  </button>
-</div>
+    <!-- components header -->
+    <div class="flex flex-col gap-1 px-2">
+      <h1 class="text-3xl font-bold text-text-main tracking-tight">
+        {{ sessionValue.templateSnapshot.name }}
+      </h1>
+      <p class="text-text-muted font-medium text-sm flex items-center gap-1">
+        <!-- TODO: calculate and show real data -->
+        <span class="material-symbols-outlined text-[16px]">schedule</span> 45min
+        <span class="mx-1">•</span>
+        <span class="material-symbols-outlined text-[16px]">equalizer</span> Intermediate
+      </p>
+    </div>
+  </div>
+  <!-- progress-bar -->
+  <app-progress-bar [progress]="progress()"></app-progress-bar>
+
+  <!-- exercises -->
+  <div class="flex-1 px-4 flex flex-col gap-8 pb-32 overflow-y-auto">
+    @for (exercise of sessionValue.currentState; track exercise.id; let idx = $index) {
+      <app-exercise-card
+        [exercise]="exercise"
+        [sessionId]="sessionValue.id"
+        [exerciseIndex]="idx"
+        (exerciseCompleted)="onExerciseCompleted($event)"
+      ></app-exercise-card>
+    }
+  </div>
+
+  <!-- finish btn -->
+  <div
+    class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 bg-gradient-to-t from-background-dark via-background-dark to-transparent pointer-events-none z-30"
+  >
+    <button
+      (click)="finish()"
+      class="pointer-events-auto w-full h-14 bg-primary text-black font-bold text-lg rounded-full shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+    >
+      <span class="material-symbols-outlined">flag</span>
+      Finish Workout
+    </button>
+  </div>
 }

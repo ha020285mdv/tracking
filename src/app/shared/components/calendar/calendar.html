@@ -1,0 +1,81 @@
+<div class="p-4 bg-card-dark rounded-xl shadow-sm border border-transparent relative">
+  <div class="flex items-center justify-between mb-4">
+    <button
+      type="button"
+      (click)="prevMonth()"
+      class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors text-text-main"
+      title="Previous month"
+    >
+      <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+    </button>
+    <h3 class="text-lg font-bold text-text-main">{{ monthLabel() }}</h3>
+    <button
+      type="button"
+      (click)="nextMonth()"
+      class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors text-text-main"
+      title="Next month"
+    >
+      <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+    </button>
+  </div>
+  <div class="calendar-grid mb-2">
+    <div class="calendar-weekday">M</div>
+    <div class="calendar-weekday">T</div>
+    <div class="calendar-weekday">W</div>
+    <div class="calendar-weekday">T</div>
+    <div class="calendar-weekday">F</div>
+    <div class="calendar-weekday">S</div>
+    <div class="calendar-weekday">S</div>
+  </div>
+  <div class="flex flex-col gap-1">
+    @for (week of weeks(); track trackWeek($index)) {
+      <div class="calendar-grid">
+        @for (day of week; track trackDay($index, day)) {
+          <button
+            type="button"
+            class="calendar-day"
+            [class.inactive]="!day.inCurrentMonth"
+            [class.today]="day.isToday"
+            [class.has-workout]="day.workouts.length > 0"
+            [class.multi-workout]="day.workouts.length > 1"
+            [class.selected]="selectedDayKey() === day.key"
+            (click)="onDayClick(day, $event)"
+            [attr.aria-label]="
+              day.dayNumber + (day.workouts.length ? ' (' + day.workouts.length + ' workouts)' : '')
+            "
+          >
+            <span class="day-number">{{ day.dayNumber }}</span>
+            @if (day.workouts.length === 1) {
+              <span class="workout-dot"></span>
+            }
+            @if (day.workouts.length > 1) {
+              <span class="workout-count">{{ day.workouts.length }}</span>
+            }
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @let selected = selectedDay();
+  @if (selected && selected.workouts.length > 1) {
+    <div class="workout-popup" (click)="$event.stopPropagation()">
+      <div class="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
+        {{ selected.workouts.length }} workouts on
+        {{ selected.date | date: 'MMM d' }}
+      </div>
+      <div class="flex flex-wrap gap-2">
+        @for (workout of selected.workouts; track workout.id) {
+          <button
+            type="button"
+            (click)="onWorkoutSelect(workout)"
+            class="workout-bubble"
+            [title]="workout.name"
+          >
+            {{ trimName(workout.name) }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

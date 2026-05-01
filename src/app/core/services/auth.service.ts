@@ -42,11 +42,12 @@ export class AuthService {
       console.warn('No user available for getting ID token');
       return from([null]);
     }
-    return from(user.getIdToken(true)).pipe(
+    // Note: Firebase SDK caches tokens automatically and refreshes when expired
+    return from(user.getIdToken()).pipe(
       catchError((error) => {
         console.error('Error getting ID token:', error);
         return from([null]);
-      })
+      }),
     );
   }
 
@@ -58,7 +59,8 @@ export class AuthService {
       return null;
     }
     try {
-      return await user.getIdToken(true);
+      // Note: Firebase SDK caches tokens automatically and refreshes when expired
+      return await user.getIdToken();
     } catch (error) {
       console.error('Error getting ID token:', error);
       return null;
@@ -68,14 +70,14 @@ export class AuthService {
   signInWithEmail$(email: string, password: string): Observable<void> {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
       map(() => void 0),
-      catchError((error) => throwError(() => this.handleAuthError(error)))
+      catchError((error) => throwError(() => this.handleAuthError(error))),
     );
   }
 
   signUpWithEmail$(email: string, password: string): Observable<void> {
     return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
       map(() => void 0),
-      catchError((error) => throwError(() => this.handleAuthError(error)))
+      catchError((error) => throwError(() => this.handleAuthError(error))),
     );
   }
 
@@ -83,13 +85,13 @@ export class AuthService {
     const provider = new GoogleAuthProvider();
     return from(signInWithPopup(this.auth, provider)).pipe(
       map(() => void 0),
-      catchError((error) => throwError(() => this.handleAuthError(error)))
+      catchError((error) => throwError(() => this.handleAuthError(error))),
     );
   }
 
   signOut$(): Observable<void> {
     return from(signOut(this.auth)).pipe(
-      catchError((error) => throwError(() => this.handleAuthError(error)))
+      catchError((error) => throwError(() => this.handleAuthError(error))),
     );
   }
 

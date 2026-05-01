@@ -23,21 +23,169 @@ export async function getWorkoutByUserId(userId: string, limit?: number): Promis
   if (snapshot.empty) {
     return [];
   }
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WorkoutDto));
+
+  // Fetch user's favorites to annotate workouts
+  const favSnapshot = await db.collection('favorites').where('userId', '==', userId).get();
+  const favoriteWorkoutIds = new Set(
+    favSnapshot.docs.map((d) => (d.data() as any).workoutId as string).filter(Boolean),
+  );
+
+  return snapshot.docs
+    .map((doc) => {
+      const workout = { id: doc.id, ...doc.data() } as WorkoutDto;
+      workout.favorite = favoriteWorkoutIds.has(doc.id);
+      return workout;
+    })
+    .filter((workout) => !workout.deletedAt); // Exclude soft-deleted workouts
 }
 
-export async function getWorkoutById(id: string) {
+export async function getWorkoutById(id: string, includeDeleted = false) {
   const doc = await db.collection('workouts').doc(id).get();
   if (!doc.exists) {
     return null;
   }
-  return { id: doc.id, ...doc.data() } as WorkoutDto;
+  const workout = { id: doc.id, ...doc.data() } as WorkoutDto;
+
+  // Return null for soft-deleted workouts unless explicitly requested
+  if (!includeDeleted && workout.deletedAt) {
+    return null;
+  }
+
+  return workout;
+}
+
+export async function updateWorkout(
+  userId: string,
+  workoutId: string,
+  updates: Partial<Pick<WorkoutDto, 'name' | 'description' | 'exercises'>>,
+): Promise<WorkoutDto | null> {
+  const docRef = db.collection('workouts').doc(workoutId);
+  const doc = await docRef.get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  const existingWorkout = doc.data() as WorkoutDto;
+
+  // Verify ownership
+  if (existingWorkout.userId !== userId) {
+    throw new Error('Not authorized to update this workout');
+  }
+
+  // Check if soft-deleted
+  if (existingWorkout.deletedAt) {
+    throw new Error('Cannot update a deleted workout');
+  }
+
+  const updatedAt = new Date().toISOString();
+  await docRef.update({
+    ...updates,
+    updatedAt,
+  });
+
+  const updated = await docRef.get();
+  return { id: updated.id, ...updated.data() } as WorkoutDto;
+}
+
+export async function deleteWorkout(userId: string, workoutId: string): Promise<WorkoutDto | null> {
+  const docRef = db.collection('workouts').doc(workoutId);
+  const doc = await docRef.get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  const existingWorkout = doc.data() as WorkoutDto;
+
+  // Verify ownership
+  if (existingWorkout.userId !== userId) {
+    throw new Error('Not authorized to delete this workout');
+  }
+
+  // Check if already soft-deleted
+  if (existingWorkout.deletedAt) {
+    return { ...existingWorkout, id: doc.id };
+  }
+
+  const deletedAt = new Date().toISOString();
+  await docRef.update({
+    deletedAt,
+    updatedAt: deletedAt,
+  });
+
+  return { ...existingWorkout, id: doc.id, deletedAt, updatedAt: deletedAt };
+}
+
+export async function getFavoriteWorkoutsByUserId(
+  userId: string,
+  limit?: number,
+): Promise<WorkoutDto[]> {
+  // Per-user favorites are stored in `favorites` collection documents: { userId, workoutId, createdAt }
+  let favQuery: FirebaseFirestore.Query = db.collection('favorites').where('userId', '==', userId);
+  if (limit) {
+    favQuery = favQuery.limit(limit);
+  }
+
+  const favSnapshot = await favQuery.get();
+  if (favSnapshot.empty) {
+    return [];
+  }
+
+  const workoutIds = favSnapshot.docs
+    .map((d) => (d.data() as any).workoutId as string)
+    .filter(Boolean);
+  if (workoutIds.length === 0) return [];
+
+  // Fetch workouts by id. Use batched gets.
+  const workouts: WorkoutDto[] = [];
+  for (const id of workoutIds) {
+    const doc = await db.collection('workouts').doc(id).get();
+    if (doc.exists) {
+      const data = doc.data() as any;
+      // Skip deleted workouts
+      if (data.deletedAt) continue;
+      workouts.push({ id: doc.id, ...data, favorite: true } as WorkoutDto);
+    }
+  }
+
+  return workouts;
+}
+
+export async function toggleFavoriteWorkout(
+  userId: string,
+  workoutId: string,
+): Promise<WorkoutDto | null> {
+  // Ensure workout exists
+  const workoutRef = db.collection('workouts').doc(workoutId);
+  const workoutDoc = await workoutRef.get();
+  if (!workoutDoc.exists) {
+    return null;
+  }
+
+  const favCollection = db.collection('favorites');
+  // favorite doc id can be composed for quick lookup
+  const favDocId = `${userId}_${workoutId}`;
+  const favDocRef = favCollection.doc(favDocId);
+  const favDoc = await favDocRef.get();
+
+  if (favDoc.exists) {
+    // remove favorite
+    await favDocRef.delete();
+  } else {
+    await favDocRef.set({ userId, workoutId, createdAt: new Date().toISOString() });
+  }
+
+  // return workout with favorite=true if now favorited
+  const updatedWorkout = { id: workoutDoc.id, ...(workoutDoc.data() as any) } as WorkoutDto;
+  updatedWorkout.favorite = !favDoc.exists;
+  return updatedWorkout;
 }
 
 export async function activateSet(
   sessionId: string,
   exerciseId: string,
-  setId: string
+  setId: string,
 ): Promise<ActiveSessionDto | null> {
   const docRef = db.collection('activeSessions').doc(sessionId);
   const doc = await docRef.get();
@@ -57,8 +205,8 @@ export async function activateSet(
         exercise.id === exerciseId && set.id === setId
           ? StatusEnum.Active
           : set.status === StatusEnum.Active
-          ? StatusEnum.Pending
-          : set.status,
+            ? StatusEnum.Pending
+            : set.status,
     })),
   }));
 
@@ -79,7 +227,7 @@ export async function activateSet(
 export async function completeSet(
   sessionId: string,
   exerciseId: string,
-  completedSet: any
+  completedSet: any,
 ): Promise<ActiveSessionDto | null> {
   const docRef = db.collection('activeSessions').doc(sessionId);
   const doc = await docRef.get();
@@ -96,8 +244,47 @@ export async function completeSet(
     sets: exercise.sets.map((set) =>
       exercise.id === exerciseId && set.id === completedSet.id
         ? { ...set, ...completedSet, status: StatusEnum.Completed }
-        : set
+        : set,
     ),
+  }));
+
+  const lastModifiedAt = new Date().toISOString();
+  await docRef.update({
+    currentState: updatedExercises,
+    lastModifiedAt,
+  });
+
+  return {
+    ...session,
+    id: sessionId,
+    currentState: updatedExercises,
+    lastModifiedAt,
+  };
+}
+
+export async function deactivateOtherSets(
+  sessionId: string,
+  exceptExerciseId: string,
+): Promise<ActiveSessionDto | null> {
+  const docRef = db.collection('activeSessions').doc(sessionId);
+  const doc = await docRef.get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  const session = doc.data() as ActiveSessionDto;
+
+  // Set all active sets in OTHER exercises back to pending
+  const updatedExercises = session.currentState.map((exercise) => ({
+    ...exercise,
+    sets: exercise.sets.map((set) => ({
+      ...set,
+      status:
+        exercise.id !== exceptExerciseId && set.status === StatusEnum.Active
+          ? StatusEnum.Pending
+          : set.status,
+    })),
   }));
 
   const lastModifiedAt = new Date().toISOString();
@@ -118,7 +305,7 @@ export async function completeSet(
 
 export async function startWorkoutSession(
   userId: string,
-  templateId: string
+  templateId: string,
 ): Promise<ActiveSessionDto> {
   // Get the workout template
   const templateDoc = await db.collection('workouts').doc(templateId).get();
@@ -197,7 +384,7 @@ export async function getActiveSessionById(sessionId: string): Promise<ActiveSes
 
 export async function updateActiveSession(
   sessionId: string,
-  updates: Partial<Pick<ActiveSessionDto, 'currentState'>>
+  updates: Partial<Pick<ActiveSessionDto, 'currentState'>>,
 ): Promise<ActiveSessionDto | null> {
   const docRef = db.collection('activeSessions').doc(sessionId);
   const doc = await docRef.get();
@@ -219,7 +406,7 @@ export async function updateActiveSession(
 
 export async function finishWorkoutSession(
   sessionId: string,
-  notes?: string
+  notes?: string,
 ): Promise<WorkoutHistoryDto> {
   const sessionDoc = await db.collection('activeSessions').doc(sessionId).get();
 
@@ -270,15 +457,24 @@ export async function finishWorkoutSession(
 
 export async function getWorkoutHistoryByUserId(
   userId: string,
-  limit?: number
+  options?: { limit?: number; from?: string; to?: string },
 ): Promise<WorkoutHistoryDto[]> {
-  let query = db
+  let query: FirebaseFirestore.Query = db
     .collection('workoutHistory')
-    .where('userId', '==', userId)
-    .orderBy('completedAt', 'desc');
+    .where('userId', '==', userId);
 
-  if (limit) {
-    query = query.limit(limit);
+  // Filter by date range (ISO strings from frontend)
+  if (options?.from) {
+    query = query.where('completedAt', '>=', options.from);
+  }
+  if (options?.to) {
+    query = query.where('completedAt', '<=', options.to);
+  }
+
+  query = query.orderBy('completedAt', 'desc');
+
+  if (options?.limit) {
+    query = query.limit(options.limit);
   }
 
   const snapshot = await query.get();
@@ -287,7 +483,7 @@ export async function getWorkoutHistoryByUserId(
     return [];
   }
 
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WorkoutHistoryDto));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as WorkoutHistoryDto);
 }
 
 export async function getWorkoutHistoryById(historyId: string): Promise<WorkoutHistoryDto | null> {

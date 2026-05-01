@@ -6,7 +6,7 @@ import { catchError, of, tap } from 'rxjs';
 
 export const activeSessionResolver: ResolveFn<ActiveSession | null> = (
   _route: ActivatedRouteSnapshot,
-  _state: RouterStateSnapshot
+  _state: RouterStateSnapshot,
 ) => {
   const workoutService = inject(WorkoutService);
   const router = inject(Router);
@@ -23,9 +23,9 @@ export const activeSessionResolver: ResolveFn<ActiveSession | null> = (
     }),
     catchError((error) => {
       console.error('Error fetching active session:', error);
-      // redirect home on error
+      // redirect to home on error
       router.navigate(['/']);
       return of(null);
-    })
+    }),
   );
 };

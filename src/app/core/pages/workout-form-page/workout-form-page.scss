@@ -1,0 +1,11 @@
+// Workout form page styles
+
+// Fix textarea scrollbar respecting rounded corners
+textarea#description {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

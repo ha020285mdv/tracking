@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, QueryList, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProgressBar } from './progress-bar/progress-bar';
 import { Status } from '../../enums/status.enum';
@@ -18,6 +18,8 @@ export class SessionPage {
   private readonly workoutService = inject(WorkoutService);
   private readonly router = inject(Router);
 
+  @ViewChildren(ExerciseCard) exerciseCards!: QueryList<ExerciseCard>;
+
   // Subscribe to the active session from the service
   protected readonly session = toSignal<ActiveSession | null>(this.workoutService.activeSession$, {
     initialValue: null,
@@ -28,11 +30,14 @@ export class SessionPage {
     if (!sessionValue) {
       return 0;
     }
-    const totalSets = sessionValue.currentState.reduce((total, exercise) => total + exercise.sets.length, 0);
+    const totalSets = sessionValue.currentState.reduce(
+      (total, exercise) => total + exercise.sets.length,
+      0,
+    );
     const completedSets = sessionValue.currentState.reduce(
       (total, exercise) =>
         total + exercise.sets.filter((set) => set.status === Status.Completed).length,
-      0
+      0,
     );
 
     return totalSets === 0 ? 0 : Math.round((completedSets / totalSets) * 100);
@@ -52,5 +57,14 @@ export class SessionPage {
         this.workoutService.setActiveSession(null);
         this.router.navigate(['/']);
       });
+  }
+
+  onExerciseCompleted(completedIndex: number): void {
+    // Expand the next exercise in the list
+    const nextIndex = completedIndex + 1;
+    const cards = this.exerciseCards.toArray();
+    if (nextIndex < cards.length) {
+      cards[nextIndex]?.expand();
+    }
   }
 }

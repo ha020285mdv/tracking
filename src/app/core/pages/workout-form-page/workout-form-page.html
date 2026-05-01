@@ -1,0 +1,574 @@
+<div class="flex flex-col gap-6 px-4 py-6 max-w-2xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-text-main">{{ pageTitle() }}</h1>
+    <a
+      routerLink="/workouts"
+      class="text-sm text-text-muted hover:text-text-main transition-colors"
+    >
+      Cancel
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex justify-center py-12">
+      <div class="text-text-muted">Loading...</div>
+    </div>
+  } @else {
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20">
+        <p class="text-sm text-red-400">{{ error() }}</p>
+      </div>
+    }
+
+    <!-- Form -->
+    <form (submit)="onSave(); $event.preventDefault()" class="flex flex-col gap-6">
+      <!-- Basic Info Section -->
+      <div class="flex flex-col gap-4">
+        <h2 class="text-lg font-semibold text-text-main">Basic Info</h2>
+
+        <!-- Name -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-text-main mb-2">
+            Workout Name <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            [value]="name()"
+            (input)="name.set($any($event.target).value)"
+            (blur)="onNameBlur()"
+            placeholder="e.g., Upper Body Strength"
+            required
+            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-text-main placeholder:text-text-muted/50 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-colors"
+          />
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-medium text-text-main mb-2">
+            Description
+          </label>
+          <div class="relative">
+            <textarea
+              id="description"
+              [value]="description()"
+              (input)="description.set($any($event.target).value)"
+              placeholder="Brief description of this workout..."
+              rows="2"
+              class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-text-main placeholder:text-text-muted/50 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-colors resize-none overflow-hidden"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Target Muscles (derived from exercises) -->
+        @if (workoutTargetMuscles().length > 0) {
+          <div>
+            <label class="block text-sm font-medium text-text-muted mb-2"
+              >Target Muscles (from exercises)</label
+            >
+            <div class="flex flex-wrap gap-2">
+              @for (muscle of workoutTargetMuscles(); track muscle) {
+                <span
+                  class="px-3 py-1.5 text-sm rounded-full bg-primary/20 text-primary font-medium"
+                >
+                  {{ muscle }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Exercises Section -->
+      <div class="flex flex-col gap-4">
+        <h2 class="text-lg font-semibold text-text-main">
+          Exercises <span class="text-red-400">*</span>
+        </h2>
+
+        <!-- Exercise List -->
+        <div class="flex flex-col gap-3">
+          @for (exercise of exercises(); track exercise.id; let i = $index) {
+            <div
+              class="bg-card-dark border border-white/10 rounded-xl overflow-hidden focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all"
+            >
+              <!-- Exercise Header -->
+              <div class="flex items-center gap-3 p-4">
+                <!-- Reorder Buttons -->
+                <div class="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    (click)="moveExerciseUp(i)"
+                    [disabled]="i === 0"
+                    class="p-1 text-text-muted hover:text-text-main disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Move up"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    (click)="moveExerciseDown(i)"
+                    [disabled]="i === exercises().length - 1"
+                    class="p-1 text-text-muted hover:text-text-main disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Move down"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Exercise Info -->
+                <button
+                  type="button"
+                  (click)="toggleExerciseExpanded(exercise.id)"
+                  class="flex-1 flex items-center justify-between text-left"
+                >
+                  <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                      <span class="text-text-main font-medium">{{ exercise.name }}</span>
+                      @if (exercise.type === ExerciseType.Timed) {
+                        <span
+                          class="px-1.5 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-400 font-medium"
+                          >TIMED</span
+                        >
+                      }
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-text-muted">
+                      <span
+                        >{{ getSetCount(exercise) }} set{{
+                          getSetCount(exercise) !== 1 ? 's' : ''
+                        }}</span
+                      >
+                      @if (exercise.targetMuscles.length > 0) {
+                        <span>•</span>
+                        <span>{{ exercise.targetMuscles.join(', ') }}</span>
+                      }
+                    </div>
+                  </div>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    [class]="exercise.isExpanded ? 'transform rotate-180' : ''"
+                    class="text-text-muted transition-transform"
+                  >
+                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                  </svg>
+                </button>
+
+                <!-- Remove Exercise -->
+                <button
+                  type="button"
+                  (click)="removeExercise(exercise.id)"
+                  class="p-2 text-red-400 hover:text-red-300 transition-colors"
+                  title="Remove exercise"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Exercise Details (Collapsible) -->
+              @if (exercise.isExpanded) {
+                <div class="border-t border-white/10 p-4 bg-white/[0.02] flex flex-col gap-4">
+                  <!-- Exercise Name Edit -->
+                  <div>
+                    <label class="block text-xs font-medium text-text-muted mb-1">Name</label>
+                    <input
+                      type="text"
+                      [value]="exercise.name"
+                      (input)="updateExerciseName(exercise.id, $any($event.target).value)"
+                      (blur)="onExerciseNameBlur(exercise.id)"
+                      [attr.data-exercise-name]="exercise.id"
+                      class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-text-main text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <!-- Target Muscles (Chips) -->
+                  <div>
+                    <label class="block text-xs font-medium text-text-muted mb-2"
+                      >Target Muscles</label
+                    >
+                    <div class="flex flex-wrap gap-2">
+                      @for (muscle of muscleGroups; track muscle) {
+                        <button
+                          type="button"
+                          (click)="toggleExerciseTargetMuscle(exercise.id, muscle)"
+                          [class]="
+                            exercise.targetMuscles.includes(muscle)
+                              ? 'px-2.5 py-1 text-xs rounded-full bg-primary text-black font-medium transition-colors'
+                              : 'px-2.5 py-1 text-xs rounded-full bg-white/10 text-text-muted hover:bg-white/20 transition-colors'
+                          "
+                        >
+                          {{ muscle }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Exercise Description -->
+                  <div>
+                    <label class="block text-xs font-medium text-text-muted mb-1"
+                      >Description (optional)</label
+                    >
+                    <input
+                      type="text"
+                      [value]="exercise.description"
+                      (input)="updateExerciseDescription(exercise.id, $any($event.target).value)"
+                      placeholder="e.g., Keep back straight, slow descent..."
+                      class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-text-main text-sm placeholder:text-text-muted/50 focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <!-- Sets Section -->
+                  <div class="flex flex-col gap-3">
+                    <div class="text-xs font-medium text-text-muted">
+                      {{ exercise.type === ExerciseType.Timed ? 'Intervals & Rests' : 'Sets' }}
+                    </div>
+
+                    @if (exercise.sets.length > 0) {
+                      <!-- Sets Header -->
+                      @if (exercise.type === ExerciseType.Timed) {
+                        <div
+                          class="grid grid-cols-[2rem_1fr_auto] gap-2 text-xs text-text-muted font-medium px-2"
+                        >
+                          <div>#</div>
+                          <div>Duration</div>
+                          <div class="w-8"></div>
+                        </div>
+                      } @else {
+                        <div
+                          class="grid grid-cols-12 gap-2 text-xs text-text-muted font-medium px-2"
+                        >
+                          <div class="col-span-1">#</div>
+                          <div class="col-span-5">Weight (kg)</div>
+                          <div class="col-span-4">Reps</div>
+                          <div class="col-span-2"></div>
+                        </div>
+                      }
+
+                      <!-- Sets List -->
+                      @for (set of exercise.sets; track set.id; let j = $index) {
+                        @if (exercise.type === ExerciseType.Timed) {
+                          <!-- Timed Set/Rest Row -->
+                          <div
+                            class="grid grid-cols-[2rem_1fr_auto] gap-2 items-center"
+                            [class.opacity-60]="set.isRest"
+                          >
+                            <div class="text-sm text-text-muted flex items-center justify-center">
+                              @if (set.isRest) {
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  class="text-orange-400"
+                                >
+                                  <path
+                                    d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
+                                  />
+                                </svg>
+                              } @else {
+                                {{ j + 1 - getRestCountBefore(exercise, j) }}
+                              }
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                (click)="
+                                  decrementDuration(
+                                    exercise.id,
+                                    set.id,
+                                    set.duration,
+                                    exercise.timeUnit
+                                  )
+                                "
+                                class="p-1 text-text-muted hover:text-text-main bg-white/5 rounded transition-colors shrink-0"
+                                title="Decrease"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19 13H5v-2h14v2z" />
+                                </svg>
+                              </button>
+                              <input
+                                type="number"
+                                [value]="getDurationInUnit(set.duration, exercise.timeUnit)"
+                                (input)="
+                                  setDurationFromUnit(
+                                    exercise.id,
+                                    set.id,
+                                    +$any($event.target).value,
+                                    exercise.timeUnit
+                                  )
+                                "
+                                min="1"
+                                title="Duration"
+                                class="w-14 px-1.5 py-1 bg-white/5 border border-white/10 rounded text-text-main text-sm text-center focus:outline-none focus:border-blue-500 transition-colors"
+                              />
+                              <button
+                                type="button"
+                                (click)="
+                                  incrementDuration(
+                                    exercise.id,
+                                    set.id,
+                                    set.duration,
+                                    exercise.timeUnit
+                                  )
+                                "
+                                class="p-1 text-text-muted hover:text-text-main bg-white/5 rounded transition-colors shrink-0"
+                                title="Increase"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg>
+                              </button>
+                              <!-- Inline unit chips -->
+                              <div class="flex gap-0.5 ml-1">
+                                <button
+                                  type="button"
+                                  (click)="updateExerciseTimeUnit(exercise.id, 'sec')"
+                                  [class]="
+                                    exercise.timeUnit === 'sec'
+                                      ? 'px-1.5 py-0.5 text-[10px] rounded bg-blue-500 text-white font-medium transition-colors'
+                                      : 'px-1.5 py-0.5 text-[10px] rounded bg-white/10 text-text-muted hover:bg-white/20 transition-colors'
+                                  "
+                                >
+                                  sec
+                                </button>
+                                <button
+                                  type="button"
+                                  (click)="updateExerciseTimeUnit(exercise.id, 'min')"
+                                  [class]="
+                                    exercise.timeUnit === 'min'
+                                      ? 'px-1.5 py-0.5 text-[10px] rounded bg-blue-500 text-white font-medium transition-colors'
+                                      : 'px-1.5 py-0.5 text-[10px] rounded bg-white/10 text-text-muted hover:bg-white/20 transition-colors'
+                                  "
+                                >
+                                  min
+                                </button>
+                              </div>
+                              @if (set.isRest) {
+                                <span class="text-[10px] text-orange-400 font-medium ml-auto"
+                                  >REST</span
+                                >
+                              }
+                            </div>
+                            <button
+                              type="button"
+                              (click)="removeSet(exercise.id, set.id)"
+                              class="p-1 text-text-muted hover:text-red-400 transition-colors shrink-0"
+                              title="Remove"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                  d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        } @else {
+                          <!-- Standard Set Row -->
+                          <div class="grid grid-cols-12 gap-2 items-center">
+                            <div class="col-span-1 text-sm text-text-muted">{{ j + 1 }}</div>
+                            <div class="col-span-5 flex items-center gap-1">
+                              <button
+                                type="button"
+                                (click)="decrementWeight(exercise.id, set.id, set.weight)"
+                                class="p-1 text-text-muted hover:text-text-main bg-white/5 rounded transition-colors"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19 13H5v-2h14v2z" />
+                                </svg>
+                              </button>
+                              <input
+                                type="number"
+                                [value]="set.weight"
+                                (input)="
+                                  updateSetWeight(exercise.id, set.id, +$any($event.target).value)
+                                "
+                                min="0"
+                                step="0.5"
+                                class="flex-1 min-w-0 px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-text-main text-sm text-center focus:outline-none focus:border-blue-500 transition-colors"
+                              />
+                              <button
+                                type="button"
+                                (click)="incrementWeight(exercise.id, set.id, set.weight)"
+                                class="p-1 text-text-muted hover:text-text-main bg-white/5 rounded transition-colors"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                (click)="setNoWeight(exercise.id, set.id)"
+                                class="px-1.5 py-1 text-[10px] text-text-muted hover:text-primary bg-white/5 rounded transition-colors font-medium"
+                                title="Set to bodyweight (0 kg)"
+                              >
+                                BW
+                              </button>
+                            </div>
+                            <div class="col-span-4 flex items-center gap-1">
+                              <button
+                                type="button"
+                                (click)="decrementReps(exercise.id, set.id, set.reps)"
+                                class="p-1 text-text-muted hover:text-text-main bg-white/5 rounded transition-colors"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19 13H5v-2h14v2z" />
+                                </svg>
+                              </button>
+                              <input
+                                type="number"
+                                [value]="set.reps"
+                                (input)="
+                                  updateSetReps(exercise.id, set.id, +$any($event.target).value)
+                                "
+                                min="1"
+                                class="flex-1 min-w-0 px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-text-main text-sm text-center focus:outline-none focus:border-blue-500 transition-colors"
+                              />
+                              <button
+                                type="button"
+                                (click)="incrementReps(exercise.id, set.id, set.reps)"
+                                class="p-1 text-text-muted hover:text-text-main bg-white/5 rounded transition-colors"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div class="col-span-2 flex justify-end">
+                              <button
+                                type="button"
+                                (click)="removeSet(exercise.id, set.id)"
+                                class="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                                title="Remove set"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path
+                                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      }
+                    }
+
+                    <!-- Add Set/Interval Buttons -->
+                    @if (exercise.type === ExerciseType.Timed && exercise.sets.length > 0) {
+                      <div class="flex gap-2">
+                        <button
+                          type="button"
+                          (click)="addSet(exercise.id)"
+                          class="flex-1 px-4 py-2 text-sm font-medium text-blue-400 border border-blue-400/30 rounded-lg hover:bg-blue-400/10 transition-colors"
+                        >
+                          + Add Interval
+                        </button>
+                        <button
+                          type="button"
+                          (click)="addRest(exercise.id)"
+                          [disabled]="!canAddRest(exercise)"
+                          class="flex-1 px-4 py-2 text-sm font-medium text-orange-400 border border-orange-400/30 rounded-lg hover:bg-orange-400/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          + Add Rest
+                        </button>
+                      </div>
+                    } @else {
+                      <button
+                        type="button"
+                        (click)="addSet(exercise.id)"
+                        class="w-full px-4 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors"
+                      >
+                        + Add {{ exercise.type === ExerciseType.Timed ? 'Interval' : 'Set' }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Add Exercise -->
+        <div class="flex flex-col gap-3 p-4 bg-card-dark border border-white/10 rounded-xl">
+          <div class="text-sm font-medium text-text-main">Add Exercise</div>
+
+          <!-- Exercise Type Chips -->
+          <div class="flex gap-2">
+            <button
+              type="button"
+              (click)="newExerciseType.set(ExerciseType.Standard)"
+              [class]="
+                newExerciseType() === ExerciseType.Standard
+                  ? 'px-4 py-2 text-sm rounded-full bg-primary text-black font-medium transition-colors'
+                  : 'px-4 py-2 text-sm rounded-full bg-white/10 text-text-muted hover:bg-white/20 transition-colors'
+              "
+            >
+              Standard
+            </button>
+            <button
+              type="button"
+              (click)="newExerciseType.set(ExerciseType.Timed)"
+              [class]="
+                newExerciseType() === ExerciseType.Timed
+                  ? 'px-4 py-2 text-sm rounded-full bg-blue-500 text-white font-medium transition-colors'
+                  : 'px-4 py-2 text-sm rounded-full bg-white/10 text-text-muted hover:bg-white/20 transition-colors'
+              "
+            >
+              Timed
+            </button>
+          </div>
+
+          <div class="flex gap-2">
+            <input
+              type="text"
+              [value]="newExerciseName()"
+              (input)="newExerciseName.set($any($event.target).value)"
+              (keydown.enter)="addExercise(); $event.preventDefault()"
+              [placeholder]="
+                newExerciseType() === ExerciseType.Timed
+                  ? 'Exercise name (e.g., Running, Plank)'
+                  : 'Exercise name (e.g., Bench Press)'
+              "
+              class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-text-main text-sm placeholder:text-text-muted/50 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-colors"
+            />
+            <button
+              type="button"
+              (click)="addExercise()"
+              [disabled]="!newExerciseName().trim()"
+              class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Add
+            </button>
+          </div>
+          <div class="text-xs text-text-muted">
+            <span class="font-medium">Standard:</span> weight &amp; reps •
+            <span class="font-medium">Timed:</span> duration with optional rests
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="pt-4">
+        <button
+          type="submit"
+          [disabled]="!isFormValid() || isSaving()"
+          class="w-full px-4 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+        >
+          {{ isSaving() ? 'Saving...' : isEditMode() ? 'Update Workout' : 'Create Workout' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

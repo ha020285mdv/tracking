@@ -1,20 +1,86 @@
-<div class="flex flex-col gap-4">
-  <h2 class="px-2 text-xl font-bold text-text-main leading-tight">{{ exercise().name }}</h2>
-  <div class="flex flex-col gap-3">
-    @for (set of exercise().sets; track set.id) { 
-      @if (set.status !== status.Active) {
-        <app-set-card
-          [index]="$index + 1"
-          [set]="set"
-          (activate)="onSetActivate($event)"
-        ></app-set-card>
-      } @else {
-        <app-set-card-active
-          [index]="$index + 1"
-          [set]="set"
-          (complete)="onSetComplete($event)"
-        ></app-set-card-active>
-      } 
+<div
+  class="flex flex-col gap-4 p-4 rounded-2xl bg-card-dark/60 border border-white/5 shadow-lg"
+  [class.opacity-50]="isLockedByOtherTimer() && !isExpanded()"
+  [class.pointer-events-none]="isLockedByOtherTimer() && !isExpanded()"
+>
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <h2 class="text-xl font-bold text-text-main leading-tight">{{ exercise().name }}</h2>
+        @if (isLockedByOtherTimer() && !isExpanded()) {
+          <span class="material-symbols-outlined text-[16px] text-orange-400">lock</span>
+        }
+      </div>
+      @if (sessionId()) {
+        <button
+          type="button"
+          (click)="toggleExpanded()"
+          class="p-1 text-text-muted hover:text-text-main transition-colors"
+          [class.cursor-not-allowed]="isLockedByOtherTimer() && !isExpanded()"
+          title="Toggle exercise details"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            [class.rotate-180]="isExpanded()"
+            class="transition-transform"
+          >
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+          </svg>
+        </button>
+      }
+    </div>
+    @if (exercise().description && (!sessionId() || isExpanded())) {
+      <p class="text-sm text-text-muted">{{ exercise().description }}</p>
     }
   </div>
+
+  <!-- Sets -->
+  @if (!sessionId() || isExpanded()) {
+    @if (sessionId() && isTimed() && hasActiveTimedWork()) {
+      <!-- Timed exercise with unified timer view -->
+      <app-timed-exercise-active
+        [sets]="exercise().sets"
+        (onComplete)="onSetComplete($event)"
+        (onCompleteAll)="onExerciseComplete()"
+        (onTimerStart)="onTimerStarted()"
+        (onTimerStop)="onTimerStopped()"
+      ></app-timed-exercise-active>
+    } @else {
+      <!-- Standard sets list view -->
+      <div class="flex flex-col gap-3">
+        @for (set of exercise().sets; track set.id; let idx = $index) {
+          @if (set.status !== status.Active) {
+            <app-set-card
+              [index]="idx + 1"
+              [set]="set"
+              [isLocked]="sessionId() ? !canActivateSet(idx) || isLockedByOtherTimer() : false"
+              [exerciseType]="exercise().type"
+              (activate)="onSetActivate($event)"
+            ></app-set-card>
+          } @else {
+            <app-set-card-active
+              [index]="idx + 1"
+              [set]="set"
+              [exerciseType]="exercise().type"
+              (complete)="onSetComplete($event)"
+            ></app-set-card-active>
+          }
+        }
+      </div>
+    }
+  } @else {
+    <!-- Collapsed summary -->
+    <div class="py-1 text-sm text-text-muted flex items-center gap-2">
+      <span>{{ exercise().sets.length }} sets</span>
+      @if (!hasPendingSets()) {
+        <span class="text-primary flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">check</span>
+          Complete
+        </span>
+      }
+    </div>
+  }
 </div>

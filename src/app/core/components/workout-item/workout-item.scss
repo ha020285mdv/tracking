@@ -1,0 +1,44 @@
+/* Styles for the inline menu items */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.95;
+  fill: currentColor;
+}
+
+.menu-item span {
+  line-height: 1;
+}
+
+.menu-item.text-red-500 svg {
+  color: #ef4444; /* match tailwind red-500 */
+}
+
+/* Dropdown background for better contrast */
+.menu-dropdown {
+  background: #ffffff; /* near white */
+  color: #0f172a; /* slate-900 */
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08);
+}
+
+.menu-dropdown .menu-item:hover {
+  background: #f3f4f6; /* gray-100 */
+}
+
+/* Favorite highlight */
+.favorite {
+  box-shadow: 0 2px 8px rgba(250, 204, 21, 0.12);
+  border-color: rgba(250, 204, 21, 0.18);
+}
+
+.workout-name + .ml-2 {
+  margin-left: 0.5rem;
+}

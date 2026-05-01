@@ -10,73 +10,154 @@
       >
       <span class="text-base font-bold text-text-main">Active Set</span>
     </div>
-    <span class="text-xs font-mono text-text-muted"
-      >Planned: {{ setValue.weight ? setValue.weight + 'kg' : 'BW' }} × {{ setValue.reps }}</span
+    @if (isTimed()) {
+      <span class="text-xs font-mono text-text-muted flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">timer</span>
+        Target: {{ formatTime(targetDuration()) }}
+      </span>
+    } @else {
+      <span class="text-xs font-mono text-text-muted"
+        >Planned: {{ setValue.weight ? setValue.weight + 'kg' : 'BW' }} × {{ setValue.reps }}</span
+      >
+    }
+  </div>
+
+  @if (isTimed()) {
+    <!-- Timed exercise view -->
+    <div class="flex flex-col gap-4">
+      <!-- Timer display -->
+      <div class="flex flex-col items-center gap-3 py-4">
+        <div class="relative w-32 h-32">
+          <!-- Progress circle background -->
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              stroke="currentColor"
+              stroke-width="6"
+              fill="none"
+              class="text-white/10"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              stroke="currentColor"
+              stroke-width="6"
+              fill="none"
+              class="text-primary"
+              [style.stroke-dasharray]="'283'"
+              [style.stroke-dashoffset]="283 - (283 * progress()) / 100"
+              style="transition: stroke-dashoffset 0.3s ease"
+            />
+          </svg>
+          <!-- Time display -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-3xl font-bold font-mono text-text-main">{{
+              formatTime(elapsedSeconds())
+            }}</span>
+            <span class="text-xs text-text-muted">/ {{ formatTime(targetDuration()) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timer controls -->
+      <div class="flex items-center justify-center gap-3">
+        <button
+          (click)="resetTimer()"
+          class="w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-text-muted hover:bg-white/20 active:scale-95 transition-all"
+          title="Reset"
+        >
+          <span class="material-symbols-outlined text-[22px]">replay</span>
+        </button>
+        <button
+          (click)="toggleTimer()"
+          [class]="
+            timerRunning()
+              ? 'w-16 h-16 flex items-center justify-center rounded-full bg-orange-500 text-white shadow-lg active:scale-95 transition-all'
+              : 'w-16 h-16 flex items-center justify-center rounded-full bg-primary text-black shadow-lg active:scale-95 transition-all'
+          "
+        >
+          <span class="material-symbols-outlined text-[32px]">
+            {{ timerRunning() ? 'pause' : 'play_arrow' }}
+          </span>
+        </button>
+        <button
+          (click)="completeSet()"
+          class="w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-text-muted hover:bg-primary/20 hover:text-primary active:scale-95 transition-all"
+          title="Complete"
+        >
+          <span class="material-symbols-outlined text-[22px]">check</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Standard exercise view -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1.5">
+        <span
+          id="weight"
+          class="text-[10px] uppercase font-bold text-text-muted tracking-wider text-center"
+          >Weight (kg)</span
+        >
+        <div class="flex items-center bg-background-dark/30 rounded-lg p-1 border border-white/5">
+          <button
+            (click)="onDecrementWeight()"
+            class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+          >
+            <span class="material-symbols-outlined text-[18px]">remove</span>
+          </button>
+          <input
+            aria-labelledby="weight"
+            class="block w-full text-center bg-transparent border-0 p-0 text-text-main font-bold text-xl font-mono focus:ring-0"
+            type="text"
+            disabled
+            [value]="weightActual() ? weightActual() : 'BW'"
+          />
+          <button
+            (click)="onIncrementWeight()"
+            class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+          >
+            <span class="material-symbols-outlined text-[18px]">add</span>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span
+          id="reps"
+          class="text-[10px] uppercase font-bold text-text-muted tracking-wider text-center"
+          >Reps</span
+        >
+        <div class="flex items-center bg-background-dark/30 rounded-lg p-1 border border-white/5">
+          <button
+            (click)="onDecrementReps()"
+            class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+          >
+            <span class="material-symbols-outlined text-[18px]">remove</span>
+          </button>
+          <input
+            aria-labelledby="reps"
+            class="block w-full text-center bg-transparent border-0 p-0 text-text-main font-bold text-xl font-mono focus:ring-0"
+            type="number"
+            disabled
+            [value]="repsActual()"
+          />
+          <button
+            (click)="onIncrementReps()"
+            class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
+          >
+            <span class="material-symbols-outlined text-[18px]">add</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button
+      (click)="completeSet()"
+      class="w-full h-11 rounded-lg border-2 border-dashed border-gray-600 hover:border-primary hover:bg-primary/5 transition-all duration-200 flex items-center justify-center gap-2 text-gray-400 font-bold active:scale-[0.99] cursor-pointer"
     >
-  </div>
-  <div class="grid grid-cols-2 gap-3">
-    <div class="flex flex-col gap-1.5">
-      <span
-        id="weight"
-        class="text-[10px] uppercase font-bold text-text-muted tracking-wider text-center"
-        >Weight (kg)</span
-      >
-      <div class="flex items-center bg-background-dark/30 rounded-lg p-1 border border-white/5">
-        <button
-          (click)="onDecrementWeight()"
-          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
-        >
-          <span class="material-symbols-outlined text-[18px]">remove</span>
-        </button>
-        <input
-          aria-labelledby="weight"
-          class="block w-full text-center bg-transparent border-0 p-0 text-text-main font-bold text-xl font-mono focus:ring-0"
-          type="text"
-          disabled
-          [value]="weightActual() ? weightActual() : 'BW'"
-        />
-        <button
-          (click)="onIncrementWeight()"
-          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
-        >
-          <span class="material-symbols-outlined text-[18px]">add</span>
-        </button>
-      </div>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span
-        id="reps"
-        class="text-[10px] uppercase font-bold text-text-muted tracking-wider text-center"
-        >Reps</span
-      >
-      <div class="flex items-center bg-background-dark/30 rounded-lg p-1 border border-white/5">
-        <button
-          (click)="onDecrementReps()"
-          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
-        >
-          <span class="material-symbols-outlined text-[18px]">remove</span>
-        </button>
-        <input
-          aria-labelledby="reps"
-          class="block w-full text-center bg-transparent border-0 p-0 text-text-main font-bold text-xl font-mono focus:ring-0"
-          type="number"
-          disabled
-          [value]="repsActual()"
-        />
-        <button
-          (click)="onIncrementReps()"
-          class="w-9 h-9 flex items-center justify-center rounded-md bg-white/10 shadow-sm text-text-main hover:bg-white/20 active:scale-95 transition-all"
-        >
-          <span class="material-symbols-outlined text-[18px]">add</span>
-        </button>
-      </div>
-    </div>
-  </div>
-  <button
-    (click)="completeSet()"
-    class="w-full h-11 rounded-lg border-2 border-dashed border-gray-600 hover:border-primary hover:bg-primary/5 transition-all duration-200 flex items-center justify-center gap-2 text-gray-400 font-bold active:scale-[0.99] cursor-pointer"
-  >
-    <span class="material-symbols-outlined text-[20px]">check_circle</span>
-    <span>Mark Completed</span>
-  </button>
+      <span class="material-symbols-outlined text-[20px]">check_circle</span>
+      <span>Mark Completed</span>
+    </button>
+  }
 </div>

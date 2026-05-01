@@ -1,0 +1,207 @@
+@if (isComplete()) {
+  <!-- Completed State -->
+  <div class="flex flex-col items-center gap-4 py-6">
+    <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+      <span class="material-symbols-outlined text-[32px] text-primary">check_circle</span>
+    </div>
+    <div class="text-center">
+      <p class="text-lg font-bold text-text-main">Exercise Complete!</p>
+      <p class="text-sm text-text-muted">{{ completedIntervals() }} intervals finished</p>
+    </div>
+  </div>
+} @else {
+  <!-- Active Timer View -->
+  <div class="relative">
+    <div class="flex gap-4">
+      <!-- Main Timer Section -->
+      <div
+        class="flex-1 flex flex-col items-center gap-4 p-4 rounded-xl border"
+        [class.border-blue-500/30]="currentSegment()?.type === 'interval'"
+        [class.bg-blue-500/5]="currentSegment()?.type === 'interval'"
+        [class.border-orange-500/30]="currentSegment()?.type === 'rest'"
+        [class.bg-orange-500/5]="currentSegment()?.type === 'rest'"
+      >
+        <!-- Current Segment Label -->
+        <div class="flex items-center gap-2">
+          @if (currentSegment()?.type === 'interval') {
+            <span class="material-symbols-outlined text-blue-400">sprint</span>
+            <span class="text-sm font-bold text-blue-400 uppercase tracking-wider"
+              >Interval {{ currentSegmentIndex() / 2 + 1 | number: '1.0-0' }}</span
+            >
+          } @else {
+            <span class="material-symbols-outlined text-orange-400">self_improvement</span>
+            <span class="text-sm font-bold text-orange-400 uppercase tracking-wider">Rest</span>
+          }
+        </div>
+
+        <!-- Timer Circle -->
+        <div class="relative w-36 h-36">
+          <!-- Progress circle background -->
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              stroke="currentColor"
+              stroke-width="6"
+              fill="none"
+              class="text-white/10"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              stroke="currentColor"
+              stroke-width="6"
+              fill="none"
+              [class.text-blue-500]="currentSegment()?.type === 'interval'"
+              [class.text-orange-500]="currentSegment()?.type === 'rest'"
+              [style.stroke-dasharray]="'283'"
+              [style.stroke-dashoffset]="283 - (283 * segmentProgress()) / 100"
+              style="transition: stroke-dashoffset 0.3s ease"
+            />
+          </svg>
+          <!-- Time display -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-3xl font-bold font-mono text-text-main">{{
+              formatTime(segmentElapsed())
+            }}</span>
+            <span class="text-xs text-text-muted"
+              >/ {{ formatTime(currentSegment()?.duration || 0) }}</span
+            >
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-center gap-3">
+          <button
+            (click)="skipToNext()"
+            class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-text-muted hover:bg-white/20 active:scale-95 transition-all"
+            title="Skip to next"
+          >
+            <span class="material-symbols-outlined text-[20px]">skip_next</span>
+          </button>
+          <button
+            (click)="toggleTimer()"
+            [class]="
+              isRunning()
+                ? 'w-14 h-14 flex items-center justify-center rounded-full shadow-lg active:scale-95 transition-all ' +
+                  (currentSegment()?.type === 'interval'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-orange-500 text-white')
+                : 'w-14 h-14 flex items-center justify-center rounded-full bg-primary text-black shadow-lg active:scale-95 transition-all'
+            "
+          >
+            <span class="material-symbols-outlined text-[28px]">
+              {{ isRunning() ? 'pause' : 'play_arrow' }}
+            </span>
+          </button>
+          <button
+            (click)="requestFinishExercise()"
+            class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-text-muted hover:bg-primary/20 hover:text-primary active:scale-95 transition-all"
+            title="Finish exercise"
+          >
+            <span class="material-symbols-outlined text-[20px]">flag</span>
+          </button>
+        </div>
+
+        <!-- Total Progress -->
+        <div class="w-full flex flex-col gap-1">
+          <div class="flex justify-between text-xs text-text-muted">
+            <span>Total</span>
+            <span>{{ formatTime(totalElapsed()) }}</span>
+          </div>
+          <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-primary rounded-full transition-all duration-300"
+              [style.width.%]="totalProgress()"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roadmap Section -->
+      <div class="w-28 flex flex-col gap-1.5 py-2">
+        <div class="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">
+          Roadmap
+        </div>
+        @for (seg of segments(); track seg.id; let idx = $index) {
+          @let segStatus = getSegmentDisplayStatus(idx);
+          <div
+            class="flex items-center gap-2 px-2 py-1 rounded text-xs transition-all"
+            [class.bg-primary/20]="segStatus === 'completed'"
+            [class.border]="segStatus === 'active'"
+            [class.border-blue-500]="segStatus === 'active' && seg.type === 'interval'"
+            [class.border-orange-500]="segStatus === 'active' && seg.type === 'rest'"
+            [class.bg-blue-500/10]="segStatus === 'active' && seg.type === 'interval'"
+            [class.bg-orange-500/10]="segStatus === 'active' && seg.type === 'rest'"
+            [class.opacity-40]="segStatus === 'pending'"
+          >
+            @if (segStatus === 'completed') {
+              <span class="material-symbols-outlined text-[12px] text-primary">check</span>
+            } @else if (seg.type === 'interval') {
+              <span
+                class="material-symbols-outlined text-[12px]"
+                [class.text-blue-400]="segStatus === 'active'"
+                [class.text-text-muted]="segStatus !== 'active'"
+                >sprint</span
+              >
+            } @else {
+              <span
+                class="material-symbols-outlined text-[12px]"
+                [class.text-orange-400]="segStatus === 'active'"
+                [class.text-text-muted]="segStatus !== 'active'"
+                >self_improvement</span
+              >
+            }
+            <span
+              class="flex-1 truncate"
+              [class.text-primary]="segStatus === 'completed'"
+              [class.text-blue-400]="segStatus === 'active' && seg.type === 'interval'"
+              [class.text-orange-400]="segStatus === 'active' && seg.type === 'rest'"
+              [class.text-text-muted]="segStatus === 'pending'"
+            >
+              {{ seg.type === 'interval' ? 'Int' : 'Rest' }}
+            </span>
+            <span
+              class="font-mono text-[10px]"
+              [class.text-primary]="segStatus === 'completed'"
+              [class.text-text-muted]="segStatus !== 'completed'"
+            >
+              {{ formatTime(seg.duration) }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Finish Confirmation Overlay -->
+    @if (showFinishConfirmation()) {
+      <div
+        class="absolute inset-0 bg-background-dark/90 backdrop-blur-sm flex flex-col items-center justify-center gap-4 rounded-xl z-10"
+      >
+        <div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[28px] text-primary">flag</span>
+        </div>
+        <p class="text-lg font-bold text-text-main text-center">Finish exercise?</p>
+        <p class="text-sm text-text-muted text-center px-4">
+          All remaining intervals will be marked as completed.
+        </p>
+        <div class="flex gap-3 mt-2">
+          <button
+            (click)="cancelFinish()"
+            class="px-5 py-2.5 rounded-full bg-white/10 text-text-muted font-semibold hover:bg-white/20 active:scale-95 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="confirmFinish()"
+            class="px-5 py-2.5 rounded-full bg-primary text-black font-semibold active:scale-95 transition-all"
+          >
+            Finish
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}
