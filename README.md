@@ -1,59 +1,57 @@
 # TrackingApp
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.2.
+A workout tracking application built with Angular 20 and Firebase.
 
-## Development server
+## Quick Start
 
-To start a local development server, run:
+### Prerequisites
 
-```bash
-ng serve
-```
+- Node.js (v20+)
+- Firebase CLI: `npm install -g firebase-tools`
+- Firebase login: `firebase login`
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 1. Install Dependencies
 
 ```bash
-ng generate component component-name
+# Frontend (root folder)
+npm install
+
+# Backend (functions folder)
+cd functions && npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 2. Start Dev Servers
+
+**Terminal 1 — Frontend (Angular):**
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+→ Opens at http://localhost:4200
 
-To build the project run:
+**Terminal 2 — Backend (Firebase Functions):**
 
 ```bash
-ng build
+cd functions
+npm run build
+firebase emulators:start --only functions
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+→ API at http://127.0.0.1:5001/easyworkouttrack/europe-west1/api  
+→ Emulator UI at http://127.0.0.1:4000
 
-## Running unit tests
+---
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Other Commands
 
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+| Command                        | Description              |
+| ------------------------------ | ------------------------ |
+| `npm run build`                | Build for production     |
+| `npm test`                     | Run unit tests           |
+| `ng generate component <name>` | Generate a new component |
 
 ## Additional Resources
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [Angular CLI Docs](https://angular.dev/tools/cli)
+- [Firebase Functions Docs](https://firebase.google.com/docs/functions)
