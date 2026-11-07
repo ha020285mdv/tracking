@@ -1,7 +1,6 @@
 import { Component, HostListener, inject, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { User } from 'firebase/auth';
 
 @Component({
   selector: 'app-header',
@@ -22,9 +21,7 @@ export class Header {
     return url !== '/' && url !== '';
   });
 
-  get user(): User | null {
-    return this.authService.currentUser();
-  }
+  protected readonly user = this.authService.currentUser;
 
   public menuOpen = false;
 
