@@ -3,7 +3,6 @@ import { WorkoutService } from '../../services/workout.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, map, of, take } from 'rxjs';
 import { Calendar } from './calendar/calendar';
-import { UserWidget } from './user-widget/user-widget';
 import { WorkoutItem } from '../../components/workout-item/workout-item';
 import { Router, RouterLink } from '@angular/router';
 import { Workout } from '../../models/workout.model';
@@ -11,7 +10,7 @@ import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [Calendar, UserWidget, WorkoutItem, RouterLink, ConfirmDialog],
+  imports: [Calendar, WorkoutItem, RouterLink, ConfirmDialog],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
 })

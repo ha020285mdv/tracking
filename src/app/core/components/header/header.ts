@@ -1,6 +1,7 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { User } from 'firebase/auth';
 
 @Component({
   selector: 'app-header',
@@ -14,6 +15,10 @@ export class Header {
 
   get showBackButton(): boolean {
     return this.router.url !== '/' && this.router.url !== '';
+  }
+
+  get user(): User | null {
+    return this.authService.currentUser();
   }
 
   public menuOpen = false;

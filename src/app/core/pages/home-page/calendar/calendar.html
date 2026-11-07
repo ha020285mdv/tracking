@@ -2,13 +2,15 @@
   <div class="flex items-center justify-between px-2">
     <h2 class="text-xl font-bold text-text-main leading-tight">Training History</h2>
     <div class="flex items-center gap-2">
-      <button
-        type="button"
-        (click)="goToCurrentMonth()"
-        class="text-xs font-semibold text-text-muted hover:text-primary transition-colors px-2 py-1 rounded"
-      >
-        Current month
-      </button>
+      @if (!isCurrentMonth) {
+        <button
+          type="button"
+          (click)="goToCurrentMonth()"
+          class="text-xs font-semibold text-text-muted hover:text-primary transition-colors px-2 py-1 rounded"
+        >
+          Current month
+        </button>
+      }
       <a
         routerLink="/history"
         class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded"

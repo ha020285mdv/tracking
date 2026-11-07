@@ -12,6 +12,10 @@ import { SharedCalendar } from '../../../../shared/components/calendar/calendar'
 export class Calendar {
   protected readonly calendar = viewChild.required(SharedCalendar);
 
+  get isCurrentMonth(): boolean {
+    return this.calendar().isCurrentMonth();
+  }
+
   goToCurrentMonth(): void {
     this.calendar().goToCurrentMonth();
   }
