@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
@@ -13,9 +13,14 @@ export class Header {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  get showBackButton(): boolean {
-    return this.router.url !== '/' && this.router.url !== '';
-  }
+  // Signal-based URL tracking using Angular 22 Router API
+  protected readonly showBackButton = computed(() => {
+    const navigation = this.router.lastSuccessfulNavigation();
+    const url = navigation?.finalUrl
+      ? this.router.serializeUrl(navigation.finalUrl)
+      : this.router.url;
+    return url !== '/' && url !== '';
+  });
 
   get user(): User | null {
     return this.authService.currentUser();
