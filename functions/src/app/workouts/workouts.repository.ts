@@ -417,7 +417,8 @@ export async function finishWorkoutSession(
   const session = sessionDoc.data() as ActiveSessionDto;
   const completedAt = new Date();
   const startedAt = new Date(session.startedAt);
-  const duration = completedAt.getTime() - startedAt.getTime();
+  const durationMs = completedAt.getTime() - startedAt.getTime();
+  const duration = Math.round(durationMs / 1000); // convert to seconds
 
   // Convert Pending sets back to NotStarted in history
   const finalExercises = session.currentState.map((exercise) => ({
