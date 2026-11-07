@@ -61,6 +61,19 @@ export class ExerciseCard {
       { allowSignalWrites: true },
     );
 
+    // Auto-expand/collapse based on active sets
+    effect(
+      () => {
+        if (!this.sessionId()) return;
+        const hasActive = this.exercise().sets.some((s) => s.status === Status.Active);
+        // Expand if has active set, collapse if not (but only after initial state is set)
+        if (this.initialStateSet) {
+          this.isExpanded.set(hasActive);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
     // Auto-collapse when all sets become completed and emit event
     effect(
       () => {
@@ -165,7 +178,7 @@ export class ExerciseCard {
     }
 
     this.workoutService
-      .completeSet(sessionId, this.exercise().id, $event)
+      .completeSetAndActivateNext(sessionId, this.exercise().id, $event)
       .pipe(take(1))
       .subscribe({
         error: (err) => {

@@ -1,13 +1,4 @@
-import {
-  Component,
-  computed,
-  inject,
-  QueryList,
-  ViewChildren,
-  signal,
-  OnInit,
-  OnDestroy,
-} from '@angular/core';
+import { Component, computed, inject, signal, OnInit, OnDestroy, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProgressBar } from './progress-bar/progress-bar';
 import { Status } from '../../enums/status.enum';
@@ -15,19 +6,18 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ExerciseCard } from '../../components/exercise-card/exercise-card';
 import { ActiveSession } from '../../models/active-session.model';
 import { WorkoutService } from '../../services/workout.service';
+import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
 import { take } from 'rxjs/internal/operators/take';
 
 @Component({
   selector: 'app-session-page',
-  imports: [ProgressBar, ExerciseCard],
+  imports: [ProgressBar, ExerciseCard, ConfirmDialog],
   templateUrl: './session-page.html',
   styleUrl: './session-page.scss',
 })
 export class SessionPage implements OnInit, OnDestroy {
   private readonly workoutService = inject(WorkoutService);
   private readonly router = inject(Router);
-
-  @ViewChildren(ExerciseCard) exerciseCards!: QueryList<ExerciseCard>;
 
   // Subscribe to the active session from the service
   protected readonly session = toSignal<ActiveSession | null>(this.workoutService.activeSession$, {
@@ -42,6 +32,27 @@ export class SessionPage implements OnInit, OnDestroy {
   // Scroll state for collapsible header
   protected readonly isScrolled = signal<boolean>(false);
   private readonly scrollThreshold = 20; // pixels to scroll before collapsing
+
+  // Confirmation dialog state (for incomplete workout)
+  protected readonly isFinishDialogOpen = signal<boolean>(false);
+
+  // "Well done" dialog state (shown when 100% complete)
+  protected readonly isWellDoneDialogOpen = signal<boolean>(false);
+
+  // Track previous progress to detect when it hits 100%
+  private prevProgress = 0;
+
+  constructor() {
+    // Watch for workout completion (progress hits 100%)
+    effect(() => {
+      const currentProgress = this.progress();
+      if (this.prevProgress < 100 && currentProgress === 100) {
+        // Just completed all sets - show "Well done" dialog
+        this.isWellDoneDialogOpen.set(true);
+      }
+      this.prevProgress = currentProgress;
+    });
+  }
 
   ngOnInit(): void {
     this.startTimer();
@@ -138,6 +149,33 @@ export class SessionPage implements OnInit, OnDestroy {
   });
 
   finish(): void {
+    // If workout not 100% complete, show confirmation
+    if (this.progress() < 100) {
+      this.isFinishDialogOpen.set(true);
+      return;
+    }
+    this.doFinish();
+  }
+
+  onConfirmFinish(): void {
+    this.isFinishDialogOpen.set(false);
+    this.doFinish();
+  }
+
+  onCancelFinish(): void {
+    this.isFinishDialogOpen.set(false);
+  }
+
+  onConfirmWellDone(): void {
+    this.isWellDoneDialogOpen.set(false);
+    this.doFinish();
+  }
+
+  onCancelWellDone(): void {
+    this.isWellDoneDialogOpen.set(false);
+  }
+
+  private doFinish(): void {
     const sessionId = this.session()?.id;
     if (!sessionId) {
       return;
@@ -153,12 +191,8 @@ export class SessionPage implements OnInit, OnDestroy {
       });
   }
 
-  onExerciseCompleted(completedIndex: number): void {
-    // Expand the next exercise in the list
-    const nextIndex = completedIndex + 1;
-    const cards = this.exerciseCards.toArray();
-    if (nextIndex < cards.length) {
-      cards[nextIndex]?.expand();
-    }
+  onExerciseCompleted(_completedIndex: number): void {
+    // Exercise expansion is now handled automatically via active set state
+    // This handler is kept for potential future use (e.g., analytics, sounds)
   }
 }

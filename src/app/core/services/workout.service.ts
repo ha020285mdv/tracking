@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, tap, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, switchMap, of } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
@@ -6,6 +6,7 @@ import { Workout } from '../models/workout.model';
 import { ExerciseSet } from '../models/exercise-set.model';
 import { ActiveSession } from '../models/active-session.model';
 import { WorkoutHistory } from '../models/workout-history.model';
+import { Status } from '../enums/status.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -168,6 +169,79 @@ export class WorkoutService {
         set,
       })
       .pipe(tap((session) => this._activeSession$.next(session)));
+  }
+
+  /**
+   * Complete a set and automatically activate the next pending set.
+   * Looks for next pending set in current exercise, then in subsequent exercises.
+   */
+  completeSetAndActivateNext(
+    sessionId: string,
+    exerciseId: string,
+    set: ExerciseSet,
+  ): Observable<ActiveSession> {
+    return this.completeSet(sessionId, exerciseId, set).pipe(
+      switchMap((session) => {
+        const nextSet = this.findNextPendingSet(session, exerciseId);
+        if (nextSet) {
+          return this.activateSet(sessionId, nextSet.exerciseId, nextSet.setId);
+        }
+        return of(session);
+      }),
+    );
+  }
+
+  /**
+   * Find the next pending set to activate after completing a set.
+   * First looks in the current exercise, then in subsequent exercises.
+   * Only considers sets that are Pending (not Completed or Active).
+   */
+  private findNextPendingSet(
+    session: ActiveSession,
+    currentExerciseId: string,
+  ): { exerciseId: string; setId: string } | null {
+    const exercises = session.currentState;
+    const currentExerciseIndex = exercises.findIndex((e) => e.id === currentExerciseId);
+
+    if (currentExerciseIndex === -1) return null;
+
+    // First, look for next pending set in current exercise
+    const currentExercise = exercises[currentExerciseIndex];
+    if (currentExercise) {
+      for (const set of currentExercise.sets) {
+        // Only activate sets that are still pending (not completed, not already active)
+        if (set.status === Status.Pending) {
+          return { exerciseId: currentExercise.id, setId: set.id };
+        }
+      }
+    }
+
+    // Then look in subsequent exercises
+    for (let i = currentExerciseIndex + 1; i < exercises.length; i++) {
+      const exercise = exercises[i];
+      if (exercise) {
+        for (const set of exercise.sets) {
+          if (set.status === Status.Pending) {
+            return { exerciseId: exercise.id, setId: set.id };
+          }
+        }
+      }
+    }
+
+    // If nothing found after current exercise, look from the beginning
+    // (in case user skipped sets earlier)
+    for (let i = 0; i < currentExerciseIndex; i++) {
+      const exercise = exercises[i];
+      if (exercise) {
+        for (const set of exercise.sets) {
+          if (set.status === Status.Pending) {
+            return { exerciseId: exercise.id, setId: set.id };
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   deactivateOtherSets(sessionId: string, exceptExerciseId: string): Observable<ActiveSession> {

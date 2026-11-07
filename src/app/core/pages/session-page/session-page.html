@@ -44,7 +44,7 @@
   <!-- exercises -->
   <div
     #scrollContainer
-    class="flex-1 px-4 flex flex-col gap-8 pb-32 overflow-y-auto"
+    class="flex-1 px-4 flex flex-col gap-8 pb-6 overflow-y-auto"
     (scroll)="onScroll($event)"
   >
     @for (exercise of sessionValue.currentState; track exercise.id; let idx = $index) {
@@ -55,18 +55,38 @@
         (exerciseCompleted)="onExerciseCompleted($event)"
       ></app-exercise-card>
     }
-  </div>
 
-  <!-- finish btn -->
-  <div
-    class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 bg-gradient-to-t from-background-dark via-background-dark to-transparent pointer-events-none z-30"
-  >
+    <!-- finish btn -->
     <button
       (click)="finish()"
-      class="pointer-events-auto w-full h-14 bg-primary text-black font-bold text-lg rounded-full shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+      class="w-full h-14 bg-primary text-black font-bold text-lg rounded-full shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-4"
     >
       <span class="material-symbols-outlined">flag</span>
       Finish Workout
     </button>
   </div>
+
+  <!-- Finish Confirmation Dialog (incomplete workout) -->
+  <app-confirm-dialog
+    [isOpen]="isFinishDialogOpen()"
+    title="Finish Workout?"
+    [message]="
+      'You have completed ' + progress() + '% of your workout. Are you sure you want to finish?'
+    "
+    confirmText="Finish"
+    cancelText="Continue"
+    (confirmed)="onConfirmFinish()"
+    (cancelled)="onCancelFinish()"
+  ></app-confirm-dialog>
+
+  <!-- Well Done Dialog (100% complete) -->
+  <app-confirm-dialog
+    [isOpen]="isWellDoneDialogOpen()"
+    title="Well Done! 🎉"
+    message="You have completed all sets! Ready to finish your workout?"
+    confirmText="Finish Workout"
+    cancelText="Stay"
+    (confirmed)="onConfirmWellDone()"
+    (cancelled)="onCancelWellDone()"
+  ></app-confirm-dialog>
 }
